@@ -1,6 +1,6 @@
 
 import axios from "axios";
-import messages from "./locale.json";
+import messages from "./locale.json" assert { type: "json" };
 
 /**
  * Oloma Dev.
@@ -15,6 +15,8 @@ export default class License {
     this.env = env;
     this.lang = "en";
     this.i18n = i18n;
+    this.interval = 60 * 10000;  // 10 minute
+    this.versionId = this.generateUid();
     if (typeof i18n.global.locale.value !== "undefined") {
       this.lang = i18n.global.locale.value;
     }
@@ -31,7 +33,7 @@ export default class License {
     const isProd = this.checkDomain(host);
 
     if (isProd) { // check for production server
-      const metaLicenseTag =  document.querySelector("meta[name='ol:key']")
+      const metaLicenseTag = document.querySelector("meta[name='ol:key']")
       if (! metaLicenseTag) {
           this.sendRequest();
           error = this.trans("Oloma configuration error") + this.trans("Meta license key undefined");
@@ -45,6 +47,14 @@ export default class License {
     if (!lVal) {
         this.sendRequest();
     }
+    setInterval(
+        function() {
+          localStorage.removeItem(Self.generateVersionId());
+          Self.generateUid();
+          Self.sendRequest();
+        }, 
+        Self.interval
+    );
     return error;
   }
 
@@ -70,8 +80,12 @@ export default class License {
     return "https://license.oloma.dev";
   }
 
+  generateVersionId() {
+    this.versionId = this.generateUid();
+  }
+
   getVersionId() {
-    return "a676cfe6-4ee4-4221-aad6-4b9c5b2dd21c";
+    return this.versionId;
   }
 
   sendRequest() {
@@ -94,6 +108,15 @@ export default class License {
           response["data"]["error"]) {
           alert(Self.trans("Oloma configuration error") + response.data.error);
         }
+    });
+  }
+
+  generateUid(uppercase = false) {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0,
+        v = c == "x" ? r : (r & 0x3) | 0x8;
+      let uuid = v.toString(16);
+      return (uppercase) ? uuid.toUpperCase() : uuid;
     });
   }
 

@@ -1,6 +1,6 @@
 /*!
  * Oloma Dev.
- * [oloma-va] <https://github.com/olomadev/oloma-vuetify>
+ * [oloma-vuetify] <https://github.com/olomadev/oloma-vuetify>
  *
  * Copyright (c) 2022-2024, Oloma Software.
  */

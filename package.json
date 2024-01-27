@@ -1,6 +1,6 @@
 {
   "name": "oloma-vuetify",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Oloma is a tool that allows to you quickly and easily develop modern web panels using Vue.js/Vuetify",
   "main": "index.js",
   "repository": {

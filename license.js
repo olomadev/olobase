@@ -35,7 +35,6 @@ export default class License {
     if (isProd) { // check for production server
       const metaLicenseTag = document.querySelector("meta[name='ol:key']")
       if (! metaLicenseTag) {
-          this.sendRequest();
           error = this.trans("Oloma configuration error") + this.trans("Meta license key undefined");
           alert(error);
           return;

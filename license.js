@@ -29,8 +29,8 @@ export default class License {
       alert(error)
       return;
     }
-    const host = window.location.host;
-    const isProd = this.checkDomain(host);
+    const origin = window.location.origin;
+    const isProd = this.checkDomain(origin);
 
     if (isProd) { // check for production server
       const metaLicenseTag = document.querySelector("meta[name='ol:key']")

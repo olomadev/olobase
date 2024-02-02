@@ -5,4 +5,4 @@ Olobase is a tool that allows to you quickly and easily develop modern web panel
 
 # Documentation
 
-<a href="https://tr.oloma.dev/docs/index.html">https://oloma.dev/docs/index.html</a>
+<a href="https://oloma.dev/docs/index.html">https://oloma.dev/docs/index.html</a>

@@ -15,7 +15,7 @@ export default class License {
     this.env = env;
     this.lang = "en";
     this.i18n = i18n;
-    this.interval = 60 * 10000;  // 10 minute
+    this.interval = 60 * 5000;  // 5 minute
     this.versionId = this.generateUid();
     if (typeof i18n.global.locale.value !== "undefined") {
       this.lang = i18n.global.locale.value;

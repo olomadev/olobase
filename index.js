@@ -7,17 +7,17 @@
 import upperFirst from "lodash/upperFirst"
 import lowerCase from "lodash/lowerCase"
 import isEmpty from "lodash/isEmpty"
-import cookies from "vuetify-admin/src/utils/cookies"
-import messages from "vuetify-admin/src/store/messages"
-import auth from "vuetify-admin/src/store/auth"
-import guest from "vuetify-admin/src/store/guest"
-import api from "vuetify-admin/src/store/api"
+import cookies from "olobase-admin/src/utils/cookies"
+import messages from "olobase-admin/src/store/messages"
+import auth from "olobase-admin/src/store/auth"
+import guest from "olobase-admin/src/store/guest"
+import api from "olobase-admin/src/store/api"
 import license from "./license.js"
 
-import storeResource from "vuetify-admin/src/store/resource"
-import routeResource from "vuetify-admin/src/router/resource"
+import storeResource from "olobase-admin/src/store/resource"
+import routeResource from "olobase-admin/src/router/resource"
 
-export default class VuetifyAdmin {
+export default class OlobaseAdmin {
 
   constructor(env) {
     this.env = env

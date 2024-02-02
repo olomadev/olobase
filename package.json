@@ -1,11 +1,11 @@
 {
-  "name": "oloma-vuetify",
-  "version": "1.1.7",
-  "description": "Oloma is a tool that allows to you quickly and easily develop modern web panels using Vue.js/Vuetify",
+  "name": "olobase",
+  "version": "1.0.0",
+  "description": "Olobase is a tool that allows to you quickly and easily develop modern web panels using Vue.js/Vuetify",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/olomadev/vuetify.git"
+    "url": "git+https://github.com/olomadev/olobase.git"
   },
   "keywords": [
     "vuetify",
@@ -18,7 +18,7 @@
   "author": "Oloma",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/olomadev/vuetify/issues"
+    "url": "https://github.com/olomadev/olobase/issues"
   },
   "homepage": "https://oloma.dev",
   "dependencies": {

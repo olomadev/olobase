@@ -1,5 +1,5 @@
 
-# Olobase Vuetify Core
+# Olobase Core
 
 Olobase is a tool that allows to you quickly and easily develop modern web panels using Vue.js/Vuetify and Php.
 

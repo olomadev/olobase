@@ -17,7 +17,7 @@ import license from "./license.js"
 import storeResource from "olobase-admin/src/store/resource"
 import routeResource from "olobase-admin/src/router/resource"
 
-export default class OlobaseAdmin {
+export default class Olobase {
 
   constructor(env) {
     this.env = env

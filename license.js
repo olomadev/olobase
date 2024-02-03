@@ -8,6 +8,8 @@ import messages from "./locale.json" assert { type: "json" };
  * [@oloma/vuetify] <https://github.com/olomadev/oloma-vuetify>
  *
  * Copyright (c) 2022-2024, Oloma Software.
+ *
+ * https://oloma.dev/end-user-license-agreement
  */
 export default class License {
 
@@ -15,7 +17,7 @@ export default class License {
     this.env = env;
     this.lang = "en";
     this.i18n = i18n;
-    this.interval = 60 * 5000;  // 5 minute
+    this.interval = 60 * 5000;  // every 5 minute
     this.versionId = this.generateUid();
     if (typeof i18n.global.locale.value !== "undefined") {
       this.lang = i18n.global.locale.value;

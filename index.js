@@ -3,6 +3,8 @@
  * [oloma-vuetify] <https://github.com/olomadev/oloma-vuetify>
  *
  * Copyright (c) 2022-2024, Oloma Software.
+ *
+ * https://oloma.dev/end-user-license-agreement
  */
 import upperFirst from "lodash/upperFirst"
 import lowerCase from "lodash/lowerCase"

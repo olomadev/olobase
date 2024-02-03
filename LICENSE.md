@@ -1,7 +1,7 @@
 MIT License
 
-Copyright (c) 2023 Oloma Dev
-Copyright (c) 2020 Adrien Beaudouin
+Copyright (c) 2023 Oloma Dev (Olobase)
+Copyright (c) 2020 Adrien Beaudouin (Vuetify Admin)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

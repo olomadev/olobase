@@ -5,7 +5,7 @@ import messages from "./locale.json" assert { type: "json" };
 /**
  * Oloma Dev.
  * 
- * [@oloma/vuetify] <https://github.com/olomadev/oloma-vuetify>
+ * [olobase] <https://github.com/olomadev/olobase>
  *
  * Copyright (c) 2022-2024, Oloma Software.
  *

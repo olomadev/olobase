@@ -1,7 +1,18 @@
+
 MIT License
 
-Copyright (c) 2023 Oloma Dev (Olobase)
-Copyright (c) 2020 Adrien Beaudouin (Vuetify Admin)
+Copyright (c) 2023-2024 Oloma Dev
+
+Every change made and published in the Olobase version is covered by the CC BY-NC 4.0 license.
+
+https://creativecommons.org/licenses/by-nc/4.0/deed.en
+Please read CC-BY-NC-LICENSE.md file.
+
+All rights reserved.
+
+This software is based on VuetifyAdmin:
+
+Copyright (c) 2020 Adrien Beaudouin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

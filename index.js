@@ -5,6 +5,7 @@
  *
  * Copyright (c) 2022-2024, Oloma Software.
  *
+ * https://creativecommons.org/licenses/by-nc/4.0/deed.en
  * https://oloma.dev/end-user-license-agreement
  */
 import upperFirst from "lodash/upperFirst"
@@ -40,7 +41,7 @@ export default class Olobase {
     locales,
     authProvider,
     dataProvider,
-    options,
+    config,
     canAction,
     http
   }) {
@@ -75,7 +76,7 @@ export default class Olobase {
     this.translations = translations
     this.authProvider = authProvider
     this.dataProvider = dataProvider
-    this.options = options || {}
+    this.config = config || {}
     this.canAction = canAction
     this.http = http
     this.saved = false // global form saved object
@@ -324,6 +325,15 @@ export default class Olobase {
         })
     }
     return result
+  }
+
+  /**
+   * Get global admin config object
+   * 
+   * @return 
+   */
+  getConfig() {
+    return this.config;
   }
 
   /**

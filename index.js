@@ -5,7 +5,6 @@
  *
  * Copyright (c) 2022-2024, Oloma Software.
  *
- * https://creativecommons.org/licenses/by-nc/4.0/deed.en
  * https://oloma.dev/end-user-license-agreement
  */
 import upperFirst from "lodash/upperFirst"

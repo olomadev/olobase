@@ -307,21 +307,21 @@ export default class Olobase {
     const Self = this;
     let result = false;
     let user = await new Promise(function (resolve) {
-        let res = cookies.get(Self.cookieKey.user) 
-        if (res) {
-            res = JSON.parse(res)    
-            return resolve(res)
-        }
-        return resolve(null)
+      let res = cookies.get(Self.cookieKey.user) 
+      if (res) {
+        res = JSON.parse(res)    
+        return resolve(res)
+      }
+      return resolve(null)
     }).catch(function (e) {
         console.error(e)
     })
     if (user && Array.isArray(permissions)) {
-        user.roles.forEach(function(roleKey) {
-            if (permissions.includes(roleKey)) {
-                result = true
-            }
-        })
+      user.permissions.forEach(function(roleKey) {
+        if (permissions.includes(roleKey)) {
+            result = true
+        }
+      })
     }
     return result
   }

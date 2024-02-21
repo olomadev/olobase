@@ -1,12 +1,12 @@
 
-MIT License
-
-Copyright (c) 2023-2024 Oloma Dev
+Copyright (c) 2022-2024 Oloma Dev.
 
 Every change made and published in the Olobase version is covered by the CC BY-NC 4.0 license.
 
 https://creativecommons.org/licenses/by-nc/4.0/deed.en
 Please read CC-BY-NC-LICENSE.md file.
+
+MIT License
 
 All rights reserved.
 

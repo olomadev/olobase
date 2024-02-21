@@ -1,8 +1,8 @@
 
 # Olobase Core
 
-Olobase is a tool that allows to you quickly and easily develop modern web panels using Vue.js/Vuetify and Php.
+Olobase is designed to create fast and easy admin panel applications with Vue.js - Php technologies and also allows extensive customizations. It is built on Vuetify.
 
 # Documentation
 
-<a href="https://oloma.dev/olobase-docs/index.html">https://oloma.dev/olobase-docs/index.html</a>
+<a href="https://olobase.dev/docs/index.html">https://olobase.dev/docs/index.html</a>

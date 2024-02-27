@@ -11,7 +11,7 @@ import messages from "./locale.json";
  *
  * https://oloma.dev/end-user-license-agreement
  */
-export default class License {
+export default class LicenseChecker {
 
   constructor(i18n, env) {
     this.env = env;

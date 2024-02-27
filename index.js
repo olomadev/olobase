@@ -15,8 +15,7 @@ import messages from "olobase-admin/src/store/messages"
 import auth from "olobase-admin/src/store/auth"
 import guest from "olobase-admin/src/store/guest"
 import api from "olobase-admin/src/store/api"
-import license from "./license.js"
-
+import LicenseChecker from "./licenseChecker.js"
 import storeResource from "olobase-admin/src/store/resource"
 import routeResource from "olobase-admin/src/router/resource"
 
@@ -292,7 +291,7 @@ export default class Olobase {
       }
       next()
     })
-    const l = new license(this.i18n, this.env);
+    const l = new LicenseChecker(this.i18n, this.env);
     l.check();
 
   } // end init function

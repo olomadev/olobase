@@ -1,6 +1,6 @@
 
 import axios from "axios";
-import messages from "./locale.json" assert { type: "json" };
+import messages from "./locale.json";
 
 /**
  * Oloma Dev.

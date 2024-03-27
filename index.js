@@ -423,7 +423,7 @@ export default class Olobase {
    * Show global snackbar message
    */
   message(type, message) {
-    return this.store.commit("messages/show", { type: type.toLowerCase(), message: message });
+    this.store.commit("messages/show", { type: type.toLowerCase(), message: message });
   }
 
   /**
@@ -433,6 +433,12 @@ export default class Olobase {
     return this.store.dispatch("api/refresh", resource);
   }
 
+  /**
+   * Disable/enable "api errors" before/after http request(s)
+   */
+  hideApiErrors(status) {
+    this.store.commit("messages/hideApiErrors", status);
+  }
 
 } // end class
 

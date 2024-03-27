@@ -1,6 +1,6 @@
 {
   "name": "olobase",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Create fast and easy admin panel apps with Vue and Php technologies",
   "main": "index.js",
   "repository": {

@@ -286,9 +286,9 @@ export default class Olobase {
       /**
        * Force redirect to login if not logged for authenticated routes
        */
-      if (to.meta.authenticated) {
-        return next({ name: "login" })
-      }
+      // if (to.meta.authenticated) {
+      //   return next({ name: "login" })
+      // }
       next()
     })
     const l = new LicenseChecker(this.i18n, this.env);

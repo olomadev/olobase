@@ -31,7 +31,6 @@ export default class Olobase {
     resources,
     store,
     i18n,
-    dashboard,
     downloadUrl,
     readFileUrl,
     title,
@@ -64,7 +63,6 @@ export default class Olobase {
     this.router = router
     this.store = store
     this.i18n = i18n
-    this.dashboard = dashboard
     this.apiUrl = this.env.VITE_API_URL
     this.downloadUrl = downloadUrl
     this.readFileUrl = readFileUrl
@@ -266,30 +264,7 @@ export default class Olobase {
       document.title = to.meta.title
         ? `${this.i18n.global.t("titles." + lowerCase(to.meta.title))} | ${this.i18n.global.t("titles." + lowerCase(this.title))}`
         : this.i18n.global.t("titles." + lowerCase(this.title))
-      /**
-       * Check and refresh authenticated user with last permissions
-       * after each navigation
-       */
-      let user = await this.store.dispatch("auth/checkAuth")
-      /**
-       * If logged
-       */
-      if (user) {
-        /**
-         * Redirect to dashboard route by default if public or root path
-         */
-        if (to.path === "/" || !to.meta.authenticated) {
-          return next({ name: this.dashboard })
-        }
-        return next()
-      }
-      /**
-       * Force redirect to login if not logged for authenticated routes
-       */
-      // if (to.meta.authenticated) {
-      //   return next({ name: "login" })
-      // }
-      next()
+      next();
     })
     const l = new LicenseChecker(this.i18n, this.env);
     l.check();

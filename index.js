@@ -42,7 +42,7 @@ export default class Olobase {
     http
   }) {
     if (typeof this.env.VITE_SUPPORTED_LOCALES == "undefined") {
-        throw new Error("Oloma configuration error: .env.local or .env.prod environment file missed in your project !");
+        throw new Error("Olobase configuration error: .env.local or .env.prod environment file missed in your project !");
     }
     const supportedLocales = this.env.VITE_SUPPORTED_LOCALES;
     let translations = [];

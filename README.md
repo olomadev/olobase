@@ -5,4 +5,4 @@ Olobase is designed to create fast and easy admin panel applications with Vue.js
 
 # Documentation
 
-<a href="https://olobase.oloma.dev/docs/index.html">https://olobase.oloma.dev/docs/index.html</a>
+<a href="https://olobase.oloma.dev/latest/index.html">https://olobase.oloma.dev/latest/index.html</a>

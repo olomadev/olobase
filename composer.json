@@ -1,0 +1,34 @@
+{
+    "name": "olobase",
+    "type": "library",
+    "description": "Olobase is a tool that allows to you quickly and easily develop modern open api based rest apis.",
+    "license": "MIT",
+    "keywords": [
+        "olomadev",
+        "mezzio",
+        "laminas",
+        "rest",
+        "api",
+        "oloma",
+        "admin"
+    ],
+    "homepage": "https://oloma.dev",
+    "autoload": {
+        "psr-4": {
+            "Olobase\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": { 
+            "": ""
+        }
+    },
+    "require": {
+        "php": ">=8.0.0"
+    },
+    "extra": {
+        "laminas": {
+            "config-provider": "Olobase\\ConfigProvider"
+        }
+    }
+}

@@ -1,5 +1,5 @@
 {
-    "name": "olobase",
+    "name": "olomadev/olobase",
     "type": "library",
     "description": "Olobase is a tool that allows to you quickly and easily develop modern open api based rest apis.",
     "license": "MIT",

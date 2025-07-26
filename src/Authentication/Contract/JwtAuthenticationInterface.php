@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Olobase\Authentication\Contract;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Mezzio\Authentication\UserInterface;
 use Mezzio\Authentication\AuthenticationInterface;
-use Olobase\Authentication\Service\TokenServiceInterface;
 
 interface JwtAuthenticationInterface extends AuthenticationInterface
 {
@@ -23,7 +23,7 @@ interface JwtAuthenticationInterface extends AuthenticationInterface
      * 
      * @return TokenServiceInterface
      */
-    public function getTokenService(): TokenServiceInterface;
+    public function getTokenService(): TokenInterface;
 
     /**
      * Returns to  latest error key

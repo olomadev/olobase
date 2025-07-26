@@ -6,8 +6,8 @@ namespace Olobase;
 
 use Mezzio\Application;
 use Psr\Container\ContainerInterface;
-use Olobase\Authorization\Contracts\RoleModelInterface;
-use Olobase\Authorization\Contracts\PermissionModelInterface;
+use Olobase\Authorization\Contract\RoleModelInterface;
+use Olobase\Authorization\Contract\PermissionModelInterface;
 use Olobase\Authorization\Model\NullRoleModel;
 use Olobase\Authorization\Model\NullPermissionModel;
 use Olobase\Router\AttributeRouteCollector;
@@ -42,7 +42,7 @@ class ConfigProvider
     {
         return [
             'factories' => [
-                Error\ErrorWrapperInterface::class => Error\ErrorWrapperFactory::class,
+                Util\ValidationErrorFormatterInterface::class => Util\ValidationErrorFormatterFactory::class,
                 DataTable\ColumnFiltersInterface::class => DataTable\ColumnFiltersFactory::class,
 
                 AttributeRouteProviderInterface::class => function (ContainerInterface $container) {

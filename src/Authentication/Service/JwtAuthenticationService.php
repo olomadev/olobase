@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\Service;
 
-use Common\Util\RequestHelper;
-use Olobase\Authentication\Contracts\JwtAuthenticationInterface;
-use Olobase\Authorization\Contracts\RoleModelInterface;
+use Olobase\Util\RequestHelper;
+use Olobase\Authentication\Contract\JwtEncoderInterface;
+use Olobase\Authentication\Contract\TokenInterface;
+use Olobase\Authentication\Contract\JwtAuthenticationInterface;
+use Olobase\Authorization\Contract\RoleModelInterface;
+use Olobase\Exception\BadTokenException;
 use Authentication\EventListener\LoginListener;
 use Laminas\EventManager\EventManagerInterface;
-use Olobase\Authentication\Service\JwtEncoderInterface;
-use Olobase\Authentication\Service\TokenServiceInterface;
-use Olobase\Exception\BadTokenException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Authentication\Adapter\AdapterInterface;
 use Mezzio\Authentication\UserInterface;
@@ -121,7 +121,7 @@ class JwtAuthenticationService implements JwtAuthenticationInterface
         return ($this->userFactory)($result->getIdentity(), (array)$roles, $this->buildUserDetailsFromRow());
     }
 
-    public function getTokenService(): TokenServiceInterface
+    public function getTokenService(): TokenInterface
     {
         return $this->tokenService;
     }
@@ -136,7 +136,7 @@ class JwtAuthenticationService implements JwtAuthenticationInterface
         return $this->code;
     }
 
-    public function createUnauthorizedResponse(ServerRequestInterface $request) : ResponseInterface
+    public function unauthorizedResponse(ServerRequestInterface $request) : ResponseInterface
     {
         return new JsonResponse(
             [

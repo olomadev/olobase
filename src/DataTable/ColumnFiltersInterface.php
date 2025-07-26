@@ -6,11 +6,6 @@ namespace Olobase\DataTable;
 
 use Laminas\Db\Sql\SqlInterface;
 
-/**
- * @author Oloma <support@oloma.dev>
- *
- * Column filters interface
- */
 interface ColumnFiltersInterface
 {  
     /**

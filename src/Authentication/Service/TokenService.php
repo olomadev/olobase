@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\Service;
 
-use Olobase\Authentication\Helper\TokenEncryptHelper;
-use Olobase\Authentication\Contracts\JwtEncoderInterface;
-use Olobase\Authentication\Contracts\TokenInterface;
+use Olobase\Util\RequestHelper;
+use Olobase\Authentication\Util\TokenEncryptHelper;
+use Olobase\Authentication\Contract\JwtEncoderInterface;
+use Olobase\Authentication\Contract\TokenInterface;
 use Olobase\Exception\ConfigurationErrorException;
 use Laminas\Cache\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Mezzio\Authentication\UserInterface;
-use Common\Helper\RequestHelper;
 
 class TokenService implements TokenInterface
 {

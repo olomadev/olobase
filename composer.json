@@ -1,7 +1,7 @@
 {
     "name": "olomadev/olobase",
     "type": "library",
-    "description": "Olobase is a tool that allows to you quickly and easily develop modern open api based rest apis.",
+    "description": "Olobase is a tool that allows to you quickly and easily develop modern open api based rest apis using Mezzio framework.",
     "license": "MIT",
     "keywords": [
         "olomadev",
@@ -9,8 +9,7 @@
         "laminas",
         "rest",
         "api",
-        "oloma",
-        "admin"
+        "oloma"
     ],
     "homepage": "https://oloma.dev",
     "autoload": {
@@ -24,7 +23,10 @@
         }
     },
     "require": {
-        "php": ">=8.0.0"
+        "php": ">=8.0.0",
+        "ramsey/uuid": "^4.7",
+        "symfony/uid": "*",
+        "league/mime-type-detection": "^1.16"
     },
     "extra": {
         "laminas": {

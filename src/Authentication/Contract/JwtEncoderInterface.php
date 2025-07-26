@@ -2,13 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authentication\Service;
+namespace Olobase\Authentication\Contract;
 
-/**
- * @author Oloma <support@oloma.dev>
- *
- * Jwt encode interface
- */
 interface JwtEncoderInterface
 {
     /**

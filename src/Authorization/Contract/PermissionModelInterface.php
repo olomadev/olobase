@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authorization\Contracts;
+namespace Olobase\Authorization\Contract;
 
 /**
  * @author Oloma <support@oloma.dev>

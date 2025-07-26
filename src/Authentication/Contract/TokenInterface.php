@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authentication\Service;
+namespace Olobase\Authentication\Contract;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Olobase\Authentication\Helper\TokenEncryptHelper;
+use Olobase\Authentication\Util\TokenEncryptHelper;
 
-interface TokenServiceInterface
+interface TokenInterface
 {
     /**
      * Decode token

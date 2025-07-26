@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Olobase\Authentication\Service;
 
 use Olobase\Authentication\Helper\TokenEncryptHelper;
-use Olobase\Authentication\Service\JwtEncoderInterface;
+use Olobase\Authentication\Contracts\JwtEncoderInterface;
+use Olobase\Authentication\Contracts\TokenInterface;
 use Olobase\Exception\ConfigurationErrorException;
 use Laminas\Cache\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Mezzio\Authentication\UserInterface;
 use Common\Helper\RequestHelper;
 
-class TokenService implements TokenServiceInterface
+class TokenService implements TokenInterface
 {
     protected $config;
 

@@ -8,14 +8,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Olobase\Exception\JwtEncoderException;
 
-/**
- * @author Oloma <support@oloma.dev>
- *
- * https://github.com/firebase/php-jwt
- * 
- * Column filters
- */
-final class JwtEncoder implements JwtEncoderInterface
+final class JwtEncoderService implements JwtEncoderInterface
 {
     private $publicKey;
     private $privateKey;

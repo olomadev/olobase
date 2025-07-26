@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\Service;
 
-use Common\Helper\RequestHelper;
+use Common\Util\RequestHelper;
+use Olobase\Authentication\Contracts\JwtAuthenticationInterface;
 use Olobase\Authorization\Contracts\RoleModelInterface;
 use Authentication\EventListener\LoginListener;
 use Laminas\EventManager\EventManagerInterface;
@@ -13,12 +14,11 @@ use Olobase\Authentication\Service\TokenServiceInterface;
 use Olobase\Exception\BadTokenException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Authentication\Adapter\AdapterInterface;
-use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\UserInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class JwtAuthentication implements AuthenticationInterface
+class JwtAuthenticationService implements JwtAuthenticationInterface
 {
     public const USERNAME_FIELD = 'username';
     public const PASSWORD_FIELD = 'password';
@@ -79,18 +79,18 @@ class JwtAuthentication implements AuthenticationInterface
     public function authenticate(ServerRequestInterface $request) : ?UserInterface
     {
         $this->request = $request;
-        if (! $this->validateToken()) {
+        if (! $this->isTokenValid()) {
             return null;
         }
-        if (false == $this->validateIpAddress() || false == $this->validateUserAgent()) {
+        if (false == $this->isIpAddressValid() || false == $this->validateUserAgent()) {
             return null;
         }
-        $payload = $this->getPayload()['data'];
+        $payload = $this->getTokenPayload()['data'];
         $data = (array)$payload;
         return ($this->userFactory)($data['details']->email, (array)$data['roles'], (array)$data['details']);
     }
 
-    public function createUser(ServerRequestInterface $request) : ?UserInterface
+    public function authenticateWithCredentials(ServerRequestInterface $request) : ?UserInterface
     {
         $this->request = $request;
         $post = $request->getParsedBody();
@@ -105,149 +105,20 @@ class JwtAuthentication implements AuthenticationInterface
         $this->authAdapter->setCredential($post[$passwordField]);
 
         $usernameValue = $post[$usernameField];
-        $result = $this->checkAuthentication($usernameValue);
+        $result = $this->attemptAuthentication($usernameValue);
         if (!$result) {
             return null;
         }
         $this->rowObject = $this->authAdapter->getResultRowObject(); // create authenticated user object
 
-        if ($this->checkUserInactive()) {
+        if ($this->isUserInactive()) {
             return null;
         }
-        $roles = $this->checkUserHasRole();
+        $roles = $this->getUserRoles();
         if (!$roles) {
             return null;
         }
-        return ($this->userFactory)($result->getIdentity(), (array)$roles, $this->getUserDetails());
-    }
-
-    private function checkUserInactive() : bool
-    {
-        if (empty($this->rowObject->is_active)) {
-            $this->error(Self::ACCOUNT_IS_INACTIVE_OR_SUSPENDED);
-            return true;
-        }
-        return false;
-    }
-
-    private function checkAuthentication($usernameValue)
-    {
-        try {
-            $result = $this->authAdapter->authenticate();
-        } catch (\Throwable $e) {
-            throw $e->getPrevious() ?: $e;
-        }
-        if (! $result->isValid()) {
-            $this->error(Self::USERNAME_OR_PASSWORD_INCORRECT);
-            return false;
-        }
-        return $result;
-    }
-
-    private function checkUserHasRole() : array|bool
-    {
-        $roles = $this->roleModel->findRolesByUserId($this->rowObject->id);
-        if (empty($roles)) {
-            $this->error(Self::NO_ROLE_DEFINED_ON_THE_ACCOUNT);
-            return false;
-        }
-        return $roles;
-    }
-
-    private function getUserDetails(): array
-    {
-        $hasAvatar = property_exists($this->rowObject, 'avatar_image')
-            && !empty($this->rowObject->avatar_image)
-            && property_exists($this->rowObject, 'mime_type')
-            && !empty($this->rowObject->mime_type);
-
-        return [
-            'id' => $this->rowObject->id,
-            'email' => $this->rowObject->email,
-            'fullname' => (string)$this->rowObject->firstname . ' ' . (string)$this->rowObject->lastname,
-            'avatar' => $hasAvatar
-                ? "data:{$this->rowObject->mime_type};base64,{$this->rowObject->avatar_image}"
-                : null,
-            'ip' => $this->getIpAddress(),
-            'deviceKey' => $this->getDeviceKey($this->request),
-        ];
-    }
-
-    private function validateToken(): bool
-    {
-        $this->token = $this->extractToken(); // parse token from headers
-        if (! $this->token) {
-            $this->error(Self::AUTHENTICATION_REQUIRED);
-            return false;
-        }
-        $token = $this->decryptToken($this->token);  // decrypt token
-        if (!$token) {
-            $this->error(Self::TOKEN_DECRYPTION_FAILED);
-            return false;
-        }
-        $this->payload = $this->encoder->decode($token);
-        return $this->payload !== null;
-    }
-
-    private function decryptToken(string $token)
-    {
-        try {
-            return $this->tokenService->getTokenEncrypt()->decrypt($token);
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
-    private function validateIpAddress()  : bool
-    {
-        if ($this->config['token']['validation']['user_ip'] 
-            && $this->payload['data']->details->ip != $this->getIpAddress()
-        ) {
-            $this->tokenService->kill(
-                $this->payload['data']->id,
-                $this->payload['jti'],
-            );
-            $this->error(Self::IP_VALIDATION_FAILED);
-            return false;
-        }
-        return true;
-    }
-
-    private function validateUserAgent() : bool
-    {
-        if ($this->config['token']['validation']['user_agent'] 
-            && $this->payload['data']->details->deviceKey != $this->getDeviceKey($this->request)
-        ) {
-            $this->tokenService->kill(
-                $this->payload['data']->id,
-                $this->payload['jti'],
-            );
-            $this->error(Self::USER_AGENT_VALIDATION_FAILED);
-            return false;
-        }
-        return true;
-    }
-
-    private function getToken() : string
-    {
-        return $this->token;
-    }
-
-    private function getPayload() : array
-    {
-        return $this->payload;
-    }
-
-    private function extractToken(): ?string
-    {
-        $authHeader = $this->request->getHeader('Authorization');
-        if (empty($authHeader)) {
-            return null;
-        }
-        if (preg_match("/Bearer\s+(.*)$/i", $authHeader[0], $matches)) {
-            return $matches[1] == "null" ? null : $matches[1];
-        }
-        return null;
+        return ($this->userFactory)($result->getIdentity(), (array)$roles, $this->buildUserDetailsFromRow());
     }
 
     public function getTokenService(): TokenServiceInterface
@@ -265,7 +136,7 @@ class JwtAuthentication implements AuthenticationInterface
         return $this->code;
     }
 
-    public function unauthorizedResponse(ServerRequestInterface $request) : ResponseInterface
+    public function createUnauthorizedResponse(ServerRequestInterface $request) : ResponseInterface
     {
         return new JsonResponse(
             [
@@ -279,12 +150,141 @@ class JwtAuthentication implements AuthenticationInterface
         );
     }
 
+    private function isUserInactive() : bool
+    {
+        if (empty($this->rowObject->is_active)) {
+            $this->error(Self::ACCOUNT_IS_INACTIVE_OR_SUSPENDED);
+            return true;
+        }
+        return false;
+    }
+
+    private function attemptAuthentication($usernameValue)
+    {
+        try {
+            $result = $this->authAdapter->authenticate();
+        } catch (\Throwable $e) {
+            throw $e->getPrevious() ?: $e;
+        }
+        if (! $result->isValid()) {
+            $this->error(Self::USERNAME_OR_PASSWORD_INCORRECT);
+            return false;
+        }
+        return $result;
+    }
+
+    private function getUserRoles() : array|bool
+    {
+        $roles = $this->roleModel->findRolesByUserId($this->rowObject->id);
+        if (empty($roles)) {
+            $this->error(Self::NO_ROLE_DEFINED_ON_THE_ACCOUNT);
+            return false;
+        }
+        return $roles;
+    }
+
+    private function buildUserDetailsFromRow(): array
+    {
+        $hasAvatar = property_exists($this->rowObject, 'avatar_image')
+            && !empty($this->rowObject->avatar_image)
+            && property_exists($this->rowObject, 'mime_type')
+            && !empty($this->rowObject->mime_type);
+
+        return [
+            'id' => $this->rowObject->id,
+            'email' => $this->rowObject->email,
+            'fullname' => (string)$this->rowObject->firstname . ' ' . (string)$this->rowObject->lastname,
+            'avatar' => $hasAvatar
+                ? "data:{$this->rowObject->mime_type};base64,{$this->rowObject->avatar_image}"
+                : null,
+            'ip' => $this->getIpAddress(),
+            'deviceKey' => $this->generateDeviceKey($this->request),
+        ];
+    }
+
+    private function isTokenValid(): bool
+    {
+        $this->token = $this->parseBearerToken(); // parse token from headers
+        if (! $this->token) {
+            $this->error(Self::AUTHENTICATION_REQUIRED);
+            return false;
+        }
+        $token = $this->decryptTokenOrNull($this->token);  // decrypt token
+        if (!$token) {
+            $this->error(Self::TOKEN_DECRYPTION_FAILED);
+            return false;
+        }
+        $this->payload = $this->encoder->decode($token);
+        return $this->payload !== null;
+    }
+
+    private function decryptTokenOrNull(string $token)
+    {
+        try {
+            return $this->tokenService->getTokenEncrypt()->decrypt($token);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    private function isIpAddressValid()  : bool
+    {
+        if ($this->config['token']['validation']['user_ip'] 
+            && $this->payload['data']->details->ip != $this->getIpAddress()
+        ) {
+            $this->tokenService->kill(
+                $this->payload['data']->id,
+                $this->payload['jti'],
+            );
+            $this->error(Self::IP_VALIDATION_FAILED);
+            return false;
+        }
+        return true;
+    }
+
+    private function isUserAgentValid() : bool
+    {
+        if ($this->config['token']['validation']['user_agent'] 
+            && $this->payload['data']->details->deviceKey != $this->generateDeviceKey($this->request)
+        ) {
+            $this->tokenService->kill(
+                $this->payload['data']->id,
+                $this->payload['jti'],
+            );
+            $this->error(Self::USER_AGENT_VALIDATION_FAILED);
+            return false;
+        }
+        return true;
+    }
+
+    private function getRawToken() : string
+    {
+        return $this->token;
+    }
+
+    private function getTokenPayload() : array
+    {
+        return $this->payload;
+    }
+
+    private function parseBearerToken(): ?string
+    {
+        $authHeader = $this->request->getHeader('Authorization');
+        if (empty($authHeader)) {
+            return null;
+        }
+        if (preg_match("/Bearer\s+(.*)$/i", $authHeader[0], $matches)) {
+            return $matches[1] == "null" ? null : $matches[1];
+        }
+        return null;
+    }
+
     protected function error(string $errorKey)
     {
         $this->error = $errorKey;
     }
 
-    private function getDeviceKey()
+    private function generateDeviceKey()
     {
         $server = $this->request->getServerParams();
         $userAgent = empty($server['HTTP_USER_AGENT']) ? 'unknown' : $server['HTTP_USER_AGENT'];

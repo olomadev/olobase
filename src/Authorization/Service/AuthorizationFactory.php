@@ -6,7 +6,7 @@ namespace Olobase\Authorization\Service;
 
 use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Olobase\Authorization\Contracts\PermissionModelInterface;
+use Olobase\Authorization\Contract\PermissionModelInterface;
 
 class AuthorizationFactory implements FactoryInterface
 {

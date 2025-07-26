@@ -9,7 +9,7 @@ use Laminas\InputFilter\InputFilter;
 use Laminas\InputFilter\InputFilterPluginManager;
 use Olobase\Attribute\Input;
 use Olobase\Attribute\ObjectInput;
-use Olobase\Attribute\OCollectionInput;
+use Olobase\Attribute\CollectionInput;
 use Olobase\Attribute\ObjectInputFilter;
 use Olobase\Attribute\CollectionInputFilter;
 

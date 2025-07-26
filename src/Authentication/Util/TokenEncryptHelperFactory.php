@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authentication\Helper;
+namespace Olobase\Authentication\Util;
 
 use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;

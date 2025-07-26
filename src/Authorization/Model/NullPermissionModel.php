@@ -6,7 +6,7 @@ namespace Olobase\Authorization\Model;
 
 use Laminas\Paginator\Paginator;
 use Laminas\Paginator\Adapter\ArrayAdapter;
-use Olobase\Authorization\Contracts\PermissionModelInterface;
+use Olobase\Authorization\Contract\PermissionModelInterface;
 
 class NullPermissionModel implements PermissionModelInterface
 {

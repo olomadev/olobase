@@ -6,7 +6,7 @@ namespace Olobase\Authorization\Model;
 
 use Laminas\Paginator\Paginator;
 use Laminas\Paginator\Adapter\ArrayAdapter;
-use Olobase\Authorization\Contracts\RoleModelInterface;
+use Olobase\Authorization\Contract\RoleModelInterface;
 
 class NullRoleModel implements RoleModelInterface
 {

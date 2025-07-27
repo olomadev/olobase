@@ -50,7 +50,7 @@ class JwtAuthenticationService implements JwtAuthenticationInterface
     protected $request;
     protected $rowObject;
     protected $authAdapter;
-    protected $encoder;
+    protected $encoderService;
     protected $tokenService;
     protected $roleModel;
     protected $userFactory;
@@ -62,14 +62,14 @@ class JwtAuthenticationService implements JwtAuthenticationInterface
     public function __construct(
         array $config,
         AdapterInterface $authAdapter,
-        JwtEncoderInterface $encoder,
-        TokenServiceInterface $tokenService,
+        JwtEncoderInterface $encoderService,
+        TokenInterface $tokenService,
         RoleModelInterface $roleModel,
         callable $userFactory
     ) {
         $this->config = $config;
         $this->authAdapter = $authAdapter;
-        $this->encoder = $encoder;
+        $this->encoderService = $encoderService;
         $this->tokenService = $tokenService;
         $this->roleModel = $roleModel;
         $this->userFactory = $userFactory;
@@ -214,7 +214,7 @@ class JwtAuthenticationService implements JwtAuthenticationInterface
             $this->error(Self::TOKEN_DECRYPTION_FAILED);
             return false;
         }
-        $this->payload = $this->encoder->decode($token);
+        $this->payload = $this->encoderService->decode($token);
         return $this->payload !== null;
     }
 

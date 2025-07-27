@@ -9,11 +9,6 @@ use Laminas\Db\Sql\SqlInterface;
 use Laminas\Db\Adapter\AdapterInterface;
 use Olobase\Exception\MethodMandatoryException;
 
-/**
- * @author Oloma <support@oloma.dev>
- *
- * Column filters
- */
 class ColumnFilters implements ColumnFiltersInterface
 {
     protected $adapter;

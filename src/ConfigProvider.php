@@ -42,8 +42,8 @@ class ConfigProvider
     {
         return [
             'factories' => [
-                Util\ValidationErrorFormatterInterface::class => Util\ValidationErrorFormatterFactory::class,
                 DataTable\ColumnFiltersInterface::class => DataTable\ColumnFiltersFactory::class,
+                Validation\ValidationErrorFormatterInterface::class => Validation\ValidationErrorFormatterFactory::class,
 
                 AttributeRouteProviderInterface::class => function (ContainerInterface $container) {
                     return new AttributeRouteCollector(

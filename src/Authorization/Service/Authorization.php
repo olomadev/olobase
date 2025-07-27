@@ -8,7 +8,7 @@ use Mezzio\Authorization\AuthorizationInterface;
 use Mezzio\Authorization\Exception;
 use Mezzio\Router\RouteResult;
 use Psr\Http\Message\ServerRequestInterface;
-use Olobase\Authorization\Contracts\PermissionModelInterface;
+use Olobase\Authorization\Contract\PermissionModelInterface;
 
 use function sprintf;
 use function in_array;

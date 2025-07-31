@@ -22,7 +22,7 @@ interface RoleModelInterface
      * @return array List of roles
      */
     public function findAll(): ?array;
-    
+
     /**
      * Find a role by its roleId.
      *
@@ -33,11 +33,11 @@ interface RoleModelInterface
 
     /**
      * Find all roles by pagination
-     * 
+     *
      * @param  array  $get query string
      * @return Laminas\Paginator\Paginator
      */
-    public function findAllByPaging(array $get) : Paginator;
+    public function findAllByPaging(array $get): Paginator;
 
     /**
      * Create a new role and its associated permissions.
@@ -45,7 +45,7 @@ interface RoleModelInterface
      * @param array $data Role and permission data
      * @return void
      */
-    public function create(array $data) : void;
+    public function create(array $data): void;
 
     /**
      * Update an existing role and its associated permissions.
@@ -53,7 +53,7 @@ interface RoleModelInterface
      * @param array $data Role and permission data
      * @return void
      */
-    public function update(array $data) : void;
+    public function update(array $data): void;
 
     /**
      * Delete a role by its roleId.
@@ -61,5 +61,5 @@ interface RoleModelInterface
      * @param string $roleId Role ID
      * @return void
      */
-    public function delete(string $roleId) : void;
+    public function delete(string $roleId): void;
 }

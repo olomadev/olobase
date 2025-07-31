@@ -6,15 +6,15 @@ namespace Olobase\Trait;
 
 trait EnvTrait
 {
-	private $env;
+    private $env;
 
-	public function setEnv(string $env)
-	{
-		$this->env = $env;
-	}
+    public function setEnv(string $env)
+    {
+        $this->env = $env;
+    }
 
-	public function getEnv() : string
-	{
-		return $this->env;
-	}
+    public function getEnv(): string
+    {
+        return $this->env;
+    }
 }

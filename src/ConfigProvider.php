@@ -58,7 +58,7 @@ class ConfigProvider
                     }
                     return new NullPermissionModel();
                 },
-                
+
                 RoleModelInterface::class => function ($container) {
                     if ($container->has(\Authorization\Model\RoleModel::class)) {
                         return $container->get(\Authorization\Model\RoleModel::class);

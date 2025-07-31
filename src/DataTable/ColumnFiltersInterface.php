@@ -7,7 +7,7 @@ namespace Olobase\DataTable;
 use Laminas\Db\Sql\SqlInterface;
 
 interface ColumnFiltersInterface
-{  
+{
     /**
      * Reset column filter object
      *
@@ -27,7 +27,7 @@ interface ColumnFiltersInterface
      *
      * @param object $select
      */
-    public function getSelect() : SqlInterface;
+    public function getSelect(): SqlInterface;
 
     /**
      * Set columns
@@ -38,21 +38,21 @@ interface ColumnFiltersInterface
 
     /**
      * Set like columns
-     * 
+     *
      * @param array $columns
      */
     public function setLikeColumns(array $columns);
 
     /**
      * Set where columns
-     * 
+     *
      * @param array $columns
      */
     public function setWhereColumns(array $columns);
 
     /**
      * Set grouped where columns
-     * 
+     *
      * @param string $groupName name
      * @param array  $columns    column names
      * @param mixed  $returnFunc null|callable
@@ -61,7 +61,7 @@ interface ColumnFiltersInterface
 
     /**
      * Unset columns
-     * 
+     *
      * @param  array  $columns columns
      */
     public function unsetColumns(array $columns);
@@ -76,7 +76,7 @@ interface ColumnFiltersInterface
 
     /**
      * Returns to normalized data
-     * 
+     *
      * @return array
      */
     public function getRawData(): array;
@@ -90,7 +90,7 @@ interface ColumnFiltersInterface
 
     /**
      * Set date filter for date columns
-     * 
+     *
      * @param string $dateColumn column name
      * @param string $endDate if exists
      * @param string $fixedDate if fixed date exists do the query with it
@@ -102,70 +102,70 @@ interface ColumnFiltersInterface
      *
      * @return array
      */
-    public function getLikeData() : array;
+    public function getLikeData(): array;
 
     /**
      * Returns to "where" data column => value
      *
      * @return array
      */
-    public function getWhereData() : array;
+    public function getWhereData(): array;
 
     /**
      * Returns to unfiltered data
      *
      * @return array
      */
-    public function getData() : array;
+    public function getData(): array;
 
     /**
      * Returns to filtered order data: [name ASC, email DESC]
      *
      * @return array
      */
-    public function getOrderData() : array;
+    public function getOrderData(): array;
 
     /**
      * Returns to search data: columns => array('str1', 'str2')
      *
      * @return array
      */
-    public function getSearchData() : array;
+    public function getSearchData(): array;
 
     /**
      * Returns to true if not empty otherwise false
      *
      * @return boolean
      */
-    public function searchDataIsNotEmpty() : bool;
+    public function searchDataIsNotEmpty(): bool;
 
     /**
      * Returns to true if empty otherwise false
      *
      * @return boolean
      */
-    public function searchDataEmpty() : bool;
+    public function searchDataEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
      *
      * @return boolean
      */
-    public function likeDataIsEmpty() : bool;
+    public function likeDataIsEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
      *
      * @return boolean
      */
-    public function likeDataIsNotEmpty() : bool;
+    public function likeDataIsNotEmpty(): bool;
 
     /**
      * Returns to true if empty otherwise false
      *
      * @return boolean
      */
-    public function whereDataIsEmpty() : bool;
+    public function whereDataIsEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
@@ -179,20 +179,20 @@ interface ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function orderDataIsEmpty() : bool;
+    public function orderDataIsEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
      *
      * @return boolean
      */
-    public function orderDataIsNotEmpty() : bool;
+    public function orderDataIsNotEmpty(): bool;
 
     /**
      * Returns to colum names
      *
      * @return array
      */
-    public function getColumns() : array;
+    public function getColumns(): array;
 
 }

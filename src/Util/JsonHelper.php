@@ -10,7 +10,7 @@ class JsonHelper
 {
     /**
      * Debuggable json decode
-     * 
+     *
      * @param  string $data data
      * @return mixed
      * @throws JsonDecodeException
@@ -44,16 +44,16 @@ class JsonHelper
     }
 
     /**
-     * Encode json 
-     * 
+     * Encode json
+     *
      * @param  mixed $value val
      * @return string
      */
     public static function jsonEncode($value): string
     {
-        // We need to use JSON_UNESCAPED_SLASHES because JavaScript's native 
+        // We need to use JSON_UNESCAPED_SLASHES because JavaScript's native
         // JSON.stringify function uses this feature by default
-        // 
+        //
         // https://stackoverflow.com/questions/10314715/why-is-json-encode-adding-backslashes
         return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }

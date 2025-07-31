@@ -14,5 +14,6 @@ class Input
         public bool $required = true,
         public array $filters = [],
         public array $validators = []
-    ) {}
+    ) {
+    }
 }

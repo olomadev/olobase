@@ -13,12 +13,12 @@ use Laminas\Validator\AbstractValidator;
  */
 class MultipleBlobFileValidator extends AbstractValidator
 {
-    const EMPTY_FILE_ID = 'emptyFileId';
-    const EMPTY_FILE_CONTENT = 'emptyFileContent';
-    const EMPTY_MIME_TYPES_OPTION = 'emptyFileMimeTypesOption';
-    const INVALID_FILE_CONTENT = 'invalidBinaryContent';
-    const INVALID_FILE_MIME_TYPE = 'invalidFileMimeType';
-    const MAX_ALLOWED_UPLOAD_SIZE_EXCEED = 'exceedAllowedUploadSize';
+    public const EMPTY_FILE_ID = 'emptyFileId';
+    public const EMPTY_FILE_CONTENT = 'emptyFileContent';
+    public const EMPTY_MIME_TYPES_OPTION = 'emptyFileMimeTypesOption';
+    public const INVALID_FILE_CONTENT = 'invalidBinaryContent';
+    public const INVALID_FILE_MIME_TYPE = 'invalidFileMimeType';
+    public const MAX_ALLOWED_UPLOAD_SIZE_EXCEED = 'exceedAllowedUploadSize';
 
     /**
      * @var array

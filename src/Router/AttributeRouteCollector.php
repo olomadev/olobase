@@ -21,7 +21,8 @@ class AttributeRouteCollector implements AttributeRouteProviderInterface
         private ContainerInterface $container,
         private string $modulesBasePath = APP_ROOT . '/src/',
         private string $namespacePrefix = 'Modules\\',
-    ) {}
+    ) {
+    }
 
     public function registerRoutes(string $dir): void
     {
@@ -45,7 +46,7 @@ class AttributeRouteCollector implements AttributeRouteProviderInterface
         foreach ($foundFiles as $file) {
 
             $class = $this->resolveNamespace(current($file));
-            
+
             if (!class_exists($class)) {
                 continue;
             }

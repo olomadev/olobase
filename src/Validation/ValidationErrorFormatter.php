@@ -35,7 +35,7 @@ class ValidationErrorFormatter implements ValidationErrorFormatterInterface
                     break;
                 }
             }
-            
+
             foreach ($getMessages as $key => $message) {
                 if (is_array($message)) {
                     $arrayMessages = [];

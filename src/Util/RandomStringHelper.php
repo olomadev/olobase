@@ -12,7 +12,7 @@ class RandomStringHelper
 {
     /**
      * Check if the value is a valid UUID.
-     * 
+     *
      * @param  string  $value
      * @return bool
      */
@@ -43,7 +43,7 @@ class RandomStringHelper
     public static function generateRandomNumber(int $length = 10): string
     {
         return self::generateRandom('0123456789', $length);
-    }    
+    }
 
     /**
      * Generate a random alphabetic string.
@@ -97,7 +97,7 @@ class RandomStringHelper
                 throw new InvalidArgumentException("Unsupported UUID version: $version. Allowed versions: 1, 3, 4, 5.");
         }
     }
-    
+
     /**
      * Private function to generate a random string based on given characters.
      *

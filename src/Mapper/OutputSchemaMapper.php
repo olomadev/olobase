@@ -34,7 +34,7 @@ class OutputSchemaMapper
                 continue;
             }
 
-            // Type inference (Reflection property type or OA type) 
+            // Type inference (Reflection property type or OA type)
             $type = $this->detectType($property, $oaProperty);
 
             // Convert the value to the appropriate type

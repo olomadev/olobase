@@ -22,5 +22,6 @@ class ObjectInput
     public function __construct(
         public string $name,
         public array $fields
-    ) {}
+    ) {
+    }
 }

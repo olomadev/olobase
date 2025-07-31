@@ -70,7 +70,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @param object $select
      */
-    public function getSelect() : SqlInterface
+    public function getSelect(): SqlInterface
     {
         return $this->select;
     }
@@ -90,7 +90,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set search columns
-     * 
+     *
      * @param array $columns
      */
     public function setSearchColumns(array $columns)
@@ -103,7 +103,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set like columns
-     * 
+     *
      * @param array $columns
      */
     public function setLikeColumns(array $columns)
@@ -116,7 +116,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set where columns
-     * 
+     *
      * @param array $columns
      */
     public function setWhereColumns(array $columns)
@@ -129,7 +129,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Unset columns
-     * 
+     *
      * @param  array  $columns columns
      */
     public function unsetColumns(array $columns)
@@ -151,13 +151,14 @@ class ColumnFilters implements ColumnFiltersInterface
         if ($alias instanceof Expression) {
             $values = $alias->getExpressionData();
             if (is_array($values[0]) && empty($values[0][1])) {
-                $quotedValues = array_map(function($v) {
+                $quotedValues = array_map(
+                    function ($v) {
                         return is_string($v) ? "'".$v."'" : $v;
                     },
                     $values[0][1]
                 );
                 $this->alias[$name] = vsprintf($values[0][0], $quotedValues);
-            } else if (false == empty($values[0]) && is_string($values[0])) {
+            } elseif (false == empty($values[0]) && is_string($values[0])) {
                 $this->alias[$name] = $values[0]; // without arguments ...
             }
         } else {
@@ -168,7 +169,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set grouped columns
-     * 
+     *
      * @param string         $groupName  name
      * @param array          $columns    column names
      * @param callable|null  $returnFunc null|callable
@@ -179,7 +180,7 @@ class ColumnFilters implements ColumnFiltersInterface
         $returnFunc = null
     ) {
         if (is_null($returnFunc)) {
-            $returnFunc = function($val) {
+            $returnFunc = function ($val) {
                 return (bool)$val;
             };
         }
@@ -194,7 +195,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to normalized data
-     * 
+     *
      * @return array
      */
     public function getRawData(): array
@@ -230,7 +231,7 @@ class ColumnFilters implements ColumnFiltersInterface
         $platform = $this->adapter->getPlatform();
         //
         // Search data
-        // 
+        //
         foreach ($this->searchColumns as $name) {
             if (! empty($searchWords)) {  // search data for all columns
                 if (array_key_exists($name, $this->alias)) { // sql function support
@@ -244,7 +245,7 @@ class ColumnFilters implements ColumnFiltersInterface
         unset($name);
         //
         // Like data
-        // 
+        //
         foreach ($this->likeColumns as $name) {
             if (array_key_exists($name, $data)) {
                 $this->setColumnData($name, $data[$name], 'like');
@@ -253,7 +254,7 @@ class ColumnFilters implements ColumnFiltersInterface
         unset($name);
         //
         // Where data
-        // 
+        //
         foreach ($this->whereColumns as $name) {
             if (array_key_exists($name, $data)) {
                 $this->setColumnData($name, $data[$name], 'where');
@@ -261,11 +262,11 @@ class ColumnFilters implements ColumnFiltersInterface
         }
         //
         // Grouped where data
-        // 
+        //
         unset($name);
         foreach ($this->groupedColumns as $name => $props) {
             $groupName = $props['groupName'];
-            if (false == empty($data[$groupName]) 
+            if (false == empty($data[$groupName])
                 && in_array($name, $data[$groupName])
             ) {
                 $returnClosure = $props['callable'];
@@ -274,7 +275,7 @@ class ColumnFilters implements ColumnFiltersInterface
         }
         //
         // Sort data
-        // 
+        //
         if (! empty($data['_sort'])) {
             $o = 0;
             foreach ($data['_sort'] as $colName) {
@@ -291,7 +292,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set where or like data
-     * 
+     *
      * @param string $name      col key
      * @param string $value     data value
      * @param string $direction 'where' or 'like'
@@ -312,7 +313,7 @@ class ColumnFilters implements ColumnFiltersInterface
                     $this->{$direction."Data"}[$funcName] = 0;
                     break;
                 default:
-                    $this->{$direction."Data"}[$funcName] = Self::normalizeData($colValue);
+                    $this->{$direction."Data"}[$funcName] = self::normalizeData($colValue);
                     break;
             }
         } else {
@@ -325,7 +326,7 @@ class ColumnFilters implements ColumnFiltersInterface
                     $this->{$direction."Data"}[$colName] = 0;
                     break;
                 default:
-                    $this->{$direction."Data"}[$colName] = Self::normalizeData($colValue);
+                    $this->{$direction."Data"}[$colName] = self::normalizeData($colValue);
                     break;
             }
         }
@@ -333,7 +334,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set date filter for date columns
-     * 
+     *
      * @param string $dateColumnName column name
      * @param string $endDateColumnName if exists
      * @param string $fixedDateColumnName if fixed date exists do the query with it
@@ -356,47 +357,47 @@ class ColumnFilters implements ColumnFiltersInterface
         $columnEnd = $dateColumnName.'End';
 
         // "between" date filter
-        // 
+        //
         if (empty($endDateColumnName)) {
-            $dateColumn = Self::removeQuotes($dateColumn);
+            $dateColumn = self::removeQuotes($dateColumn);
             if (! empty($data[$columnStart]) && empty($data[$columnEnd])) {
                 $nest = $this->select->where->nest();
-                    $nest->and->equalTo($dateColumn, $data[$columnStart]);
+                $nest->and->equalTo($dateColumn, $data[$columnStart]);
                 $nest->unnest();
-            } else if (! empty($data[$columnEnd]) && empty($data[$columnStart])) {
+            } elseif (! empty($data[$columnEnd]) && empty($data[$columnStart])) {
                 $nest = $this->select->where->nest();
-                    $nest->and->equalTo($dateColumn, $data[$columnEnd]);
+                $nest->and->equalTo($dateColumn, $data[$columnEnd]);
                 $nest->unnest();
-            } else if (! empty($data[$columnEnd]) && ! empty($data[$columnStart])) {
+            } elseif (! empty($data[$columnEnd]) && ! empty($data[$columnStart])) {
                 $nest = $this->select->where->nest();
-                    $nest->and->between($dateColumn, $data[$columnStart], $data[$columnEnd]);
-                $nest->unnest();    
+                $nest->and->between($dateColumn, $data[$columnStart], $data[$columnEnd]);
+                $nest->unnest();
             }
         } else {  // equality & fixed date filter
             $columnStart = $dateColumn;
             $columnEnd = $endDate;
-            $startKey = Self::removeQuotes($columnStart);
-            $endKey = Self::removeQuotes($columnEnd);
-            $fixedKey = Self::removeQuotes($fixedDate);
+            $startKey = self::removeQuotes($columnStart);
+            $endKey = self::removeQuotes($columnEnd);
+            $fixedKey = self::removeQuotes($fixedDate);
             if ($fixedDate && ! empty($data[$fixedKey])) {
                 $nest = $this->select->where->nest();
-                    $nest->and->lessThanOrEqualTo($columnStart, $data[$fixedKey])
-                         ->and->greaterThanOrEqualTo($columnEnd, $data[$fixedKey]);
-                $nest->unnest();    
+                $nest->and->lessThanOrEqualTo($columnStart, $data[$fixedKey])
+                     ->and->greaterThanOrEqualTo($columnEnd, $data[$fixedKey]);
+                $nest->unnest();
             } else {
                 if (! empty($data[$startKey]) && empty($data[$endKey])) {
                     $nest = $this->select->where->nest();
-                        $nest->and->equalTo($columnStart, $data[$startKey]);
+                    $nest->and->equalTo($columnStart, $data[$startKey]);
                     $nest->unnest();
-                } else if (! empty($data[$endKey]) && empty($data[$startKey])) {
+                } elseif (! empty($data[$endKey]) && empty($data[$startKey])) {
                     $nest = $this->select->where->nest();
-                        $nest->and->equalTo($columnEnd, $data[$endKey]);
+                    $nest->and->equalTo($columnEnd, $data[$endKey]);
                     $nest->unnest();
-                } else if (! empty($data[$startKey]) && ! empty($data[$endKey])) {
+                } elseif (! empty($data[$startKey]) && ! empty($data[$endKey])) {
                     $nest = $this->select->where->nest();
-                        $nest->and->lessThanOrEqualTo($columnStart, $data[$endKey])
-                             ->and->greaterThanOrEqualTo($columnEnd, $data[$startKey]);
-                    $nest->unnest();    
+                    $nest->and->lessThanOrEqualTo($columnStart, $data[$endKey])
+                         ->and->greaterThanOrEqualTo($columnEnd, $data[$startKey]);
+                    $nest->unnest();
                 }
             }
         }
@@ -404,7 +405,7 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Check select object is empty
-     * 
+     *
      * @return void
      */
     protected function checkSelect()
@@ -424,7 +425,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getColumnData() : array
+    public function getColumnData(): array
     {
         return $this->columnData;
     }
@@ -434,7 +435,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getLikeData() : array
+    public function getLikeData(): array
     {
         return $this->likeData;
     }
@@ -444,7 +445,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getWhereData() : array
+    public function getWhereData(): array
     {
         return $this->whereData;
     }
@@ -454,7 +455,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getData() : array
+    public function getData(): array
     {
         return $this->data;
     }
@@ -464,7 +465,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getOrderData() : array
+    public function getOrderData(): array
     {
         return $this->orderData;
     }
@@ -474,7 +475,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getSearchData() : array
+    public function getSearchData(): array
     {
         return $this->searchData;
     }
@@ -484,7 +485,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function searchDataIsNotEmpty() : bool
+    public function searchDataIsNotEmpty(): bool
     {
         $this->checkSelect();
         if (false == empty($this->searchData)) {
@@ -498,7 +499,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function searchDataEmpty() : bool
+    public function searchDataEmpty(): bool
     {
         $this->checkSelect();
         if (empty($this->searchData)) {
@@ -512,7 +513,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function likeDataIsEmpty() : bool
+    public function likeDataIsEmpty(): bool
     {
         $this->checkSelect();
         if (empty($this->likeData)) {
@@ -526,7 +527,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function likeDataIsNotEmpty() : bool
+    public function likeDataIsNotEmpty(): bool
     {
         $this->checkSelect();
         if (false == empty($this->likeData)) {
@@ -540,7 +541,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function whereDataIsEmpty() : bool
+    public function whereDataIsEmpty(): bool
     {
         $this->checkSelect();
         if (empty($this->whereData)) {
@@ -553,7 +554,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function whereDataIsNotEmpty() : bool
+    public function whereDataIsNotEmpty(): bool
     {
         $this->checkSelect();
         if (false == empty($this->whereData)) {
@@ -567,7 +568,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function orderDataIsEmpty() : bool
+    public function orderDataIsEmpty(): bool
     {
         $this->checkSelect();
         if (empty($this->orderData)) {
@@ -581,7 +582,7 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return boolean
      */
-    public function orderDataIsNotEmpty() : bool
+    public function orderDataIsNotEmpty(): bool
     {
         $this->checkSelect();
         if (false == empty($this->orderData)) {
@@ -592,13 +593,13 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Remove key
-     * 
-     * @param  string $key 
+     *
+     * @param  string $key
      */
     protected static function removeQuotes($key)
     {
         if (is_string($key)) {
-            $key = str_replace(["'","`",'"'], "", $key);   
+            $key = str_replace(["'","`",'"'], "", $key);
         }
         return $key;
     }
@@ -608,15 +609,15 @@ class ColumnFilters implements ColumnFiltersInterface
      *
      * @return array
      */
-    public function getColumns() : array
+    public function getColumns(): array
     {
         return $this->columns;
     }
 
     /**
      * Filter data for "id" values
-     * 
-     * @param  array $data 
+     *
+     * @param  array $data
      * @return array
      */
     protected static function normalizeData($data)
@@ -626,10 +627,10 @@ class ColumnFilters implements ColumnFiltersInterface
             $i = 0;
             foreach ($data as $val) {
                 if (false == empty($val['id'])) {
-                  $newData[$i] = $val['id'];
-                  ++$i;
+                    $newData[$i] = $val['id'];
+                    ++$i;
                 }
-            } 
+            }
             return $newData;
         }
         return $data;

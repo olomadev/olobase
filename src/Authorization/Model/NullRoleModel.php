@@ -32,7 +32,7 @@ class NullRoleModel implements RoleModelInterface
     {
         return array();
     }
-    
+
     /**
      * Find a role by its roleId.
      *
@@ -46,11 +46,11 @@ class NullRoleModel implements RoleModelInterface
 
     /**
      * Find all roles by pagination
-     * 
+     *
      * @param  array  $get query string
      * @return Laminas\Paginator\Paginator
      */
-    public function findAllByPaging(array $get) : Paginator
+    public function findAllByPaging(array $get): Paginator
     {
         $paginatorAdapter = new ArrayAdapter([]);
         return new Paginator($paginatorAdapter);
@@ -62,7 +62,7 @@ class NullRoleModel implements RoleModelInterface
      * @param array $data Role and permission data
      * @return void
      */
-    public function create(array $data) : void
+    public function create(array $data): void
     {
         return;
     }
@@ -73,7 +73,7 @@ class NullRoleModel implements RoleModelInterface
      * @param array $data Role and permission data
      * @return void
      */
-    public function update(array $data) : void
+    public function update(array $data): void
     {
         return;
     }
@@ -84,7 +84,7 @@ class NullRoleModel implements RoleModelInterface
      * @param string $roleId Role ID
      * @return void
      */
-    public function delete(string $roleId) : void
+    public function delete(string $roleId): void
     {
         return;
     }

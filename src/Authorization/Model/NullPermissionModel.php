@@ -12,15 +12,15 @@ class NullPermissionModel implements PermissionModelInterface
 {
     /**
      * Find permissions
-     * 
+     *
      * @return array
      */
-    public function findPermissions() : array
+    public function findPermissions(): array
     {
 
-		return [
-		    'admin' => [],
-		    'user' => [],
-		];
+        return [
+            'admin' => [],
+            'user' => [],
+        ];
     }
 }

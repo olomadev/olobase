@@ -16,5 +16,6 @@ class CollectionInput
     public function __construct(
         public string $name,
         public array $fields
-    ) {}
+    ) {
+    }
 }

@@ -6,7 +6,7 @@ namespace Olobase\ModuleManager;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ComposertHelper
+class ComposerHelper
 {
     public static function runComposerInstall(OutputInterface $output): bool
     {

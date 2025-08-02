@@ -7,6 +7,7 @@ namespace Olobase\ModuleManager\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Olobase\ModuleManager\DoctrineHelper;
+use Olobase\ModuleManager\ComposerHelper;
 use Olobase\ModuleManager\ModuleMigrationRunner;
 use Olobase\ModuleManager\ModuleComposerScriptRunner;
 use Symfony\Component\Console\Command\Command;
@@ -16,25 +17,25 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ModuleRemoveCommand extends Command
 {
+    protected $config = array();
     protected static $defaultName = 'module:remove';
-
-    public function __construct(
-        private array $config
-    ) {
-        parent::__construct();
+    
+    public function setConfig(array $config)
+    {
+        $this->config = $config;
     }
 
     protected function configure(): void
     {
         $this
             ->setDescription('Remove a module.')
-            ->addOption('module', null, InputOption::VALUE_REQUIRED, 'Module name')
+            ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Module name')
             ->addOption('env', null, InputOption::VALUE_REQUIRED, 'Environment');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $module = trim((string)$input->getOption('module'));
+        $module = trim((string)$input->getOption('name'));
         $env = $input->getOption('env');
 
         if (!$module || !$env) {
@@ -55,6 +56,11 @@ class ModuleRemoveCommand extends Command
             $modulePath = "./src/$module";
             $moduleFullPath = APP_ROOT . "/$modulePath";
             $moduleFullName = ComposerHelper::getModuleNameFromComposerJson($moduleFullPath);
+
+            // Read the composer.json
+            $composerJson = json_decode(file_get_contents($composerJsonFile), true);
+            $repositories = $composerJson['repositories'] ?? [];
+            $require = $composerJson['require'] ?? [];
 
             // Remove from repositories
             $repositories = array_filter($repositories, fn ($repo) => !isset($repo['url']) || strpos($repo['url'], $module) === false);
@@ -79,17 +85,29 @@ class ModuleRemoveCommand extends Command
             $autoloadDevKey = $module . "\\Tests\\";
 
             // if the psr-4 part is present and it is indeed an associative array
-            if (
-                isset($composerJson['autoload-dev']['psr-4']) &&
-                is_array($composerJson['autoload-dev']['psr-4']) &&
-                array_keys($composerJson['autoload-dev']['psr-4']) !== range(0, count($composerJson['autoload-dev']['psr-4']) - 1)
-            ) {
-                if (isset($composerJson['autoload-dev']['psr-4'][$autoloadDevKey])) {
-                    unset($composerJson['autoload-dev']['psr-4'][$autoloadDevKey]);
-
-                    $output->writeln("<info>Removed autoload-dev: $autoloadDevKey.</info>");
+        
+            if (isset($composerJson['autoload-dev']['psr-4']) && is_array($composerJson['autoload-dev']['psr-4'])) {
+                unset($composerJson['autoload-dev']['psr-4'][$autoloadDevKey]);
+                
+                $output->writeln("<info>Removed autoload-dev: $autoloadDevKey.</info>");
+                
+                // If psr-4 is empty, write {} as an empty object instead of []:
+                if (empty($composerJson['autoload-dev']['psr-4'])) {
+                    $composerJson['autoload-dev']['psr-4'] = new \stdClass();
                 }
             }
+
+            // if (
+            //     isset($composerJson['autoload-dev']['psr-4']) &&
+            //     is_array($composerJson['autoload-dev']['psr-4']) &&
+            //     array_keys($composerJson['autoload-dev']['psr-4']) !== range(0, count($composerJson['autoload-dev']['psr-4']) - 1)
+            // ) {
+            //     if (isset($composerJson['autoload-dev']['psr-4'][$autoloadDevKey])) {
+            //         unset($composerJson['autoload-dev']['psr-4'][$autoloadDevKey]);
+
+            //         $output->writeln("<info>Removed autoload-dev: $autoloadDevKey.</info>");
+            //     }
+            // }
 
             // Save updated composer.json
             file_put_contents($composerJsonFile, json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));

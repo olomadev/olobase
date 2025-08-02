@@ -7,6 +7,7 @@ namespace Olobase\ModuleManager\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Olobase\ModuleManager\DoctrineHelper;
+use Olobase\ModuleManager\ComposerHelper;
 use Olobase\ModuleManager\ModuleMigrationRunner;
 use Olobase\ModuleManager\ModuleComposerScriptRunner;
 use Symfony\Component\Console\Command\Command;
@@ -16,25 +17,25 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ModuleInstallCommand extends Command
 {
+    protected $config = array();
     protected static $defaultName = 'module:install';
-
-    public function __construct(
-        private array $config
-    ) {
-        parent::__construct();
+    
+    public function setConfig(array $config)
+    {
+        $this->config = $config;
     }
 
     protected function configure(): void
     {
         $this
             ->setDescription('Install a module.')
-            ->addOption('module', null, InputOption::VALUE_REQUIRED, 'Module name')
+            ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Module name')
             ->addOption('env', null, InputOption::VALUE_REQUIRED, 'Environment');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $module = trim((string)$input->getOption('module'));
+        $module = trim((string)$input->getOption('name'));
         $env = $input->getOption('env');
 
         if (!$module || !$env) {
@@ -61,7 +62,7 @@ class ModuleInstallCommand extends Command
 
             $modulePath = "./src/$module";
             $moduleFullPath = APP_ROOT . "/$modulePath";
-            $moduleFullName = ComposerHelper::getmoduleFromComposerJson($moduleFullPath);
+            $moduleFullName = ComposerHelper::getModuleNameFromComposerJson($moduleFullPath);
 
             // Add to repositories
             $repositories[] = [
@@ -76,16 +77,25 @@ class ModuleInstallCommand extends Command
             }
 
             // Add Tests/ folder to autoload-dev
+            // if (!isset($composerJson['autoload-dev'])) {
+            //     $composerJson['autoload-dev'] = ['psr-4' => []];
+            // } elseif (!isset($composerJson['autoload-dev']['psr-4']) || !is_array($composerJson['autoload-dev']['psr-4'])
+            //     || array_keys($composerJson['autoload-dev']['psr-4']) === range(0, count($composerJson['autoload-dev']['psr-4']) - 1)) {
+            //     $composerJson['autoload-dev']['psr-4'] = []; // If the array is indexed (i.e. there is no object), it will be fixed
+            // }
+
+            // Add Tests/ folder to autoload-dev
             if (!isset($composerJson['autoload-dev'])) {
-                $composerJson['autoload-dev'] = ['psr-4' => []];
+                $composerJson['autoload-dev'] = ['psr-4' => new \stdClass()];
             } elseif (!isset($composerJson['autoload-dev']['psr-4']) || !is_array($composerJson['autoload-dev']['psr-4'])
                 || array_keys($composerJson['autoload-dev']['psr-4']) === range(0, count($composerJson['autoload-dev']['psr-4']) - 1)) {
-                $composerJson['autoload-dev']['psr-4'] = []; // If the array is indexed (i.e. there is no object), it will be fixed
+                $composerJson['autoload-dev']['psr-4'] = new \stdClass();
             }
+
             $autoloadDevKey = $module . "\\Tests\\";
             $autoloadDevPath = "src/{$module}/Tests/";
 
-            if (!array_key_exists($autoloadDevKey, $composerJson['autoload-dev']['psr-4'])) {
+            if (!is_object($composerJson['autoload-dev']['psr-4']) && !array_key_exists($autoloadDevKey, $composerJson['autoload-dev']['psr-4'])) {
                 $composerJson['autoload-dev']['psr-4'][$autoloadDevKey] = $autoloadDevPath;
                 $output->writeln("<info>Added autoload-dev: \"$autoloadDevKey\" => \"$autoloadDevPath\".</info>");
             }

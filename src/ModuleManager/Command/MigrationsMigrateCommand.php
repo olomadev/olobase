@@ -50,7 +50,7 @@ class MigrationsMigrateCommand extends Command
 
     private static function getConnection(array $laminasDbConfig): Connection
     {
-        $doctrineDbConfig = DoctrineHelper::formatLaminasDbConfig($laminasDbConfig);
+        $doctrineDbConfig = DoctrineHelper::convertLaminasToDoctrineDbConfig($laminasDbConfig);
         $conn = DriverManager::getConnection($doctrineDbConfig);
 
         return $conn;

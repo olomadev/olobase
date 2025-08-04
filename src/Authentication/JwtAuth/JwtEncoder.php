@@ -7,7 +7,6 @@ namespace Olobase\Authentication\JwtAuth;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Olobase\Exception\JwtEncoderException;
-use Olobase\Authentication\Contract\JwtEncoderInterface;
 
 final class JwtEncoder implements JwtEncoderInterface
 {

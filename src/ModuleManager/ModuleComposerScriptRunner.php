@@ -35,7 +35,7 @@ class ModuleComposerScriptRunner
     public function run(string $moduleFullPath)
     {
         $moduleComposerPath = "$moduleFullPath/composer.json";
-        
+
         if (! file_exists($moduleComposerPath)) {
             return;
         }
@@ -46,16 +46,16 @@ class ModuleComposerScriptRunner
 
             $postInstallCmds = $moduleComposer['extra']['olobase-post-install-cmd'] ?? [];
             foreach ($postInstallCmds as $cmd) {
-                $output->writeln("<info>Running module post-install-cmd: $cmd.</info>");
+                $this->output->writeln("<info>Running module post-install-cmd: $cmd.</info>");
                 passthru($cmd." --ansi");
             }
 
         }
         if ($this->command == "remove" && ! empty($moduleComposer['extra']['olobase-post-remove-cmd'])) {
-            
+
             $postRemoveCmds = $moduleComposer['extra']['olobase-post-remove-cmd'] ?? [];
             foreach ($postRemoveCmds as $cmd) {
-                $output->writeln("<info>Running module post-remove-cmd: $cmd.</info>");
+                $this->output->writeln("<info>Running module post-remove-cmd: $cmd.</info>");
                 passthru($cmd." --ansi");
             }
 

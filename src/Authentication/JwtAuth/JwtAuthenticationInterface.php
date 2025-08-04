@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authentication\Service;
+namespace Olobase\Authentication\JwtAuth;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Mezzio\Authentication\UserInterface;

@@ -25,7 +25,7 @@ interface TokenInterface
      * @return array|boolean
      */
     public function generateToken(ServerRequestInterface $request, ?int $expiration = null);
-
+    
     /**
      * Refresh token
      *

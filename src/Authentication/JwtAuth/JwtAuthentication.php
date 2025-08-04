@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authentication\Service;
+namespace Olobase\Authentication\JwtAuth;
 
 use Olobase\Util\StringHelper;
 use Olobase\Authentication\JwtAuth\JwtEncoderInterface;
@@ -56,6 +56,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
         private $ipAddress = null,
         private $excludedFields = array(),
     ) {
+        $this->userFactory = $userFactory;
     }
 
     public function authenticate(ServerRequestInterface $request): ?UserInterface
@@ -203,7 +204,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
     protected function decryptTokenOrNull(string $rawToken)
     {
         try {
-            return $this->token->getTokenEncrypt()->decrypt($rawToken);
+            return $this->token->getTokenEncryptHelper()->decrypt($rawToken);
         } catch (Exception $e) {
             return null;
         }

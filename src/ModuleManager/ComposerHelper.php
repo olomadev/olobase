@@ -23,15 +23,16 @@ class ComposerHelper
         }
     }
 
-    public static function getModuleNameFromComposerJson(string $moduleFullPath): ?string
+    public static function getComposerJsonData(string $moduleFullPath)
     {
         $composerFile = $moduleFullPath . '/composer.json';
-        if (file_exists($composerFile)) {
-            $composerData = json_decode(file_get_contents($composerFile), true);
-            return $composerData['name'] ?? null;
+        if (!file_exists($composerFile)) {
+            return false;
         }
-        return null;
-    }
+        $json = file_get_contents($composerFile);
+        $data = json_decode($json, true);
 
+        return is_array($data) ? $data : false;
+    }
 
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Olobase\ModuleManager;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 
 class DoctrineHelper
@@ -25,7 +27,7 @@ class DoctrineHelper
         ]);
     }
 
-    public static function formatLaminasDbConfig(array $laminasConfig): array
+    public static function convertLaminasToDoctrineDbConfig(array $laminasConfig): array
     {
         return [
             'driver'        => strtolower($laminasConfig['driver']),
@@ -37,4 +39,13 @@ class DoctrineHelper
             'driverOptions' => $laminasConfig['driver_options'] ?? [],
         ];
     }
+
+    public static function getConnection(array $laminasDbConfig): Connection
+    {
+        $doctrineDbConfig = self::convertLaminasToDoctrineDbConfig($laminasDbConfig);
+        $conn = DriverManager::getConnection($doctrineDbConfig);
+
+        return $conn;
+    }
+
 }

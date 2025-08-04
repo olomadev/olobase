@@ -5,16 +5,21 @@ namespace Olobase\Mapper;
 use ReflectionClass;
 use Laminas\InputFilter\InputFilterInterface;
 use OpenApi\Attributes\Property as OAProperty;
+use Olobase\Util\StringHelper;
 
 class InputSchemaMapper
 {
-    public function map(InputFilterInterface $inputFilter, string $schema, ?string $tablename = null): array
+    public function map(InputFilterInterface $inputFilter, object $dto, ?string $tablename = null): array
     {
         $data = $inputFilter->getData();
-        $reflection = new ReflectionClass($schema);
+        $reflection = new ReflectionClass($dto);
         $properties = $reflection->getProperties();
 
-        $table = $tablename ?? strtolower(rtrim($reflection->getShortName(), 'save'));
+        $namespace = $reflection->getNamespaceName();
+        $parts = explode('\\', $namespace);
+        $firstSegment = $parts[0];
+
+        $table = $tablename ?? StringHelper::toSnakeCase($firstSegment);
         $schemaData = [];
 
         foreach ($properties as $prop) {
@@ -23,9 +28,12 @@ class InputSchemaMapper
             // OA\Property(property="is_active") → 'is_active'
             $oaAttrs = $prop->getAttributes(OAProperty::class);
             $columnName = $propertyName;
-            if (isset($oaAttrs[0])) {
+
+            if (!empty($oaAttrs)) {
                 $column = $oaAttrs[0]->newInstance();
-                $columnName = $column->property ?? $propertyName;
+                if (!empty($column->property)) {
+                    $columnName = $column->property;
+                }
             }
 
             if (!array_key_exists($columnName, $data)) {

@@ -23,14 +23,8 @@ class ModuleMigrationRunner
         $this->command = $command;
     }
 
-    public function run(
-        string $module,
-        Connection $conn,
-        $prev = false,
-        ?string $toVersion = null,
-        $strict = false
-    ): bool {
-
+    public function run(string $module, Connection $conn, $prev = false, ?string $toVersion = null, $strict = false): bool
+    {
         $moduleMigrations = APP_ROOT . "/src/$module/src/Migrations";
         $migrationFiles = glob($moduleMigrations . '/Version*.php');
 
@@ -131,7 +125,7 @@ class ModuleMigrationRunner
             $return = true;
             for ($i = 0; $i < $stepsToRollback; $i++) {
                 $this->output->writeln("<info>Rolling back step " . ($i + 1) . ".</info>");
-                
+
                 passthru("php bin/migrations.php --module={$module} migrations:migrate prev --no-interaction --ansi", $exitCode);
 
                 if ($exitCode !== 0) {
@@ -140,7 +134,7 @@ class ModuleMigrationRunner
                     break;
                 }
             }
-            $this->output->writeln("<info>[OK] Rollback completed to version: $toVersion.</info>");            
+            $this->output->writeln("<info>[OK] Rollback completed to version: $toVersion.</info>");
             return $return;
 
         } else { // run migrations ...

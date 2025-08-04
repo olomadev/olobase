@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\JwtAuth;
 
+use Olobase\Exception\ConfigurationErrorException;
 use Olobase\Authentication\Util\TokenEncryptHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Mezzio\Authentication\UserInterface;
 use Laminas\Cache\Storage\StorageInterface;
 
-class SessionAwareTokenService extends StatelessToken
+class SessionAwareToken extends StatelessToken
 {
     protected $sessionTtl;
 
@@ -28,6 +29,12 @@ class SessionAwareTokenService extends StatelessToken
         $this->tokenValidity = intval($config['token']['token_validity'] * 60);
     }
 
+    /**
+     * Generate token data
+     * @param  ServerRequestInterface $request    request
+     * @param  integer                $expiration integer expiration
+     * @return array
+     */
     public function generateToken(ServerRequestInterface $request, $expiration = null)
     {
         $result = parent::generateToken($request, $expiration);
@@ -43,6 +50,14 @@ class SessionAwareTokenService extends StatelessToken
         return $result;
     }
 
+    /**
+     * Refresh token
+     * 
+     * @param  ServerRequestInterface $request    request
+     * @param  array                  $decoded    decoded data
+     * @param  integer                $expiration int expiration
+     * @return bool                   true / false
+     */
     public function refreshToken(ServerRequestInterface $request, array $decoded, $expiration = null)
     {
         $userId = $decoded['data']['details']['id'];
@@ -66,6 +81,13 @@ class SessionAwareTokenService extends StatelessToken
         return $result;
     }
 
+    /**
+     * Revove user token
+     * 
+     * @param  string $userId  user id
+     * @param  string $tokenId token id
+     * @return void
+     */
     public function revokeToken(string $userId, string $tokenId)
     {
         parent::revokeToken($userId, $tokenId);

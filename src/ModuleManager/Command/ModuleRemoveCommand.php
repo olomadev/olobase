@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ModuleRemoveCommand extends Command
 {
     protected $config = array();
+    protected static $defaultName = 'module:remove';
 
     public function setConfig(array $config)
     {
@@ -31,6 +32,7 @@ class ModuleRemoveCommand extends Command
             ->addOption('env', null, InputOption::VALUE_REQUIRED, 'Environment');
     }
 
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $module = trim((string)$input->getOption('name'));
@@ -40,28 +42,36 @@ class ModuleRemoveCommand extends Command
             $output->writeln('<error>--module and --env options are required.</error>');
             return Command::FAILURE;
         }
-        putenv('APP_ENV='.trim($env));
+
+        putenv('APP_ENV=' . trim($env));
 
         try {
             $visited = [];
-            $this->removeModule($module, $env, $output, $visited, $version);
+            $this->removeModule($module, $env, $output, $visited);
+
+            $modulesConfigFile = APP_ROOT . '/config/module.config.php';
+            $currentModules = (array)($this->config['modules'] ?? []);
+            $newModules = array_diff($currentModules, $visited);
+
+            if (empty($newModules)) {
+                file_put_contents($modulesConfigFile, "<?php\n\nreturn [];\n");
+            } else {
+                file_put_contents($modulesConfigFile, "<?php\n\nreturn [\n    " . implode(",\n    ", array_map(fn ($m) => "'$m'", $newModules)) . "\n];\n");
+            }
+
             $output->writeln("<info>Module $module removed successfully (with dependencies).</info>");
             return Command::SUCCESS;
         } catch (\Throwable $e) {
             $output->writeln("<error>Error: {$e->getMessage()}</error>");
             return Command::FAILURE;
         }
-
-        $output->writeln("<info>Module $module installed successfully.</info>");
-        return Command::SUCCESS;
-
     }
 
     private function removeModule(string $module, string $env, OutputInterface $output, array &$visited = [])
     {
         if (in_array($module, $visited, true)) {
             $output->writeln("<comment>Skipping already processed module: $module</comment>");
-            return Command::SUCCESS;
+            return;
         }
         $visited[] = $module;
 
@@ -69,7 +79,7 @@ class ModuleRemoveCommand extends Command
         $modulesConfig = (array)$this->config['modules'];
         if (! in_array($module, $modulesConfig, true)) {
             $output->writeln("<info>Module '$module' already removed. Skipping.</info>");
-            return Command::SUCCESS;
+            return;
         }
 
         // 2. Read module composer.json
@@ -80,7 +90,7 @@ class ModuleRemoveCommand extends Command
 
             if (!empty($extra['olobase-module-dependencies']) && is_array($extra['olobase-module-dependencies'])) {
                 foreach ($extra['olobase-module-dependencies'] as $dependency => $v) {
-                    $output->writeln("<info>Resolving dependency: $dependency (required by $module)</info>");
+                    $output->writeln("<info>Removing dependency: $dependency (required by $module)</info>");
                     $this->removeModule($dependency, $env, $output, $visited);
                 }
             }
@@ -89,6 +99,7 @@ class ModuleRemoveCommand extends Command
         // 3. Start module remove process
         $output->writeln("<info>Removing module: $module</info>");
         $this->performModuleRemove($module, $env, $output);
+        return;
     }
 
     private function performModuleRemove(string $module, string $env, OutputInterface $output)
@@ -121,9 +132,22 @@ class ModuleRemoveCommand extends Command
         $repositories = $composerJson['repositories'] ?? [];
         $require = $composerJson['require'] ?? [];
 
+
         // Remove from repositories
-        $repositories = array_filter($repositories, fn ($repo) => !isset($repo['url']) || strpos($repo['url'], $module) === false);
+        $repositories = array_filter(
+            $repositories,
+            fn ($repo) => !(
+                isset($repo['url'])
+                && (
+                    $repo['url'] === "./src/$module"
+                    || $repo['url'] === "src/$module"
+                    || str_ends_with($repo['url'], "/$module")
+                )
+            )
+        );
         $composerJson['repositories'] = array_values($repositories);
+
+        $output->writeln("<comment>Module full name: " . ($moduleFullName ?? 'null') . "</comment>");
 
         // Remove from require
         if ($moduleFullName && isset($require[$moduleFullName])) {

@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ModuleInstallCommand extends Command
 {
     protected $config = array();
+    protected static $defaultName = 'module:install';
 
     public function setConfig(array $config)
     {
@@ -47,6 +48,14 @@ class ModuleInstallCommand extends Command
         try {
             $visited = [];
             $this->installModule($module, $env, $output, $visited, $version);
+
+            // Save final modules.config.php with all visited modules
+            $modulesConfigFile = APP_ROOT . '/config/module.config.php';
+            file_put_contents(
+                $modulesConfigFile,
+                "<?php\n\nreturn [\n    " . implode(",\n    ", array_map(fn ($m) => "'$m'", $visited)) . "\n];\n"
+            );
+
             $output->writeln("<info>Module $module installed successfully (with dependencies).</info>");
             return Command::SUCCESS;
         } catch (\Throwable $e) {
@@ -62,7 +71,7 @@ class ModuleInstallCommand extends Command
     {
         if (in_array($module, $visited, true)) {
             $output->writeln("<comment>Skipping already processed module: $module</comment>");
-            return Command::SUCCESS;
+            return;
         }
         $visited[] = $module;
 
@@ -70,7 +79,7 @@ class ModuleInstallCommand extends Command
         $modulesConfig = (array)$this->config['modules'];
         if (in_array($module, $modulesConfig, true)) {
             $output->writeln("<info>Module '$module' already installed. Skipping.</info>");
-            return Command::SUCCESS;
+            return;
         }
 
         // 2. Read module composer.json
@@ -90,6 +99,7 @@ class ModuleInstallCommand extends Command
         // 3. Start module installation
         $output->writeln("<info>Installing module: $module</info>");
         $this->performModuleInstallation($module, $env, $output, $version);
+        return;
     }
 
     private function performModuleInstallation(string $module, string $env, OutputInterface $output, $version = null): void
@@ -115,7 +125,7 @@ class ModuleInstallCommand extends Command
         $require = $composerJson['require'] ?? [];
 
         $modulesConfig = (array)$this->config['modules'];
-        $modulesConfig[] = $module;
+        array_push($modulesConfig, $module);
         $output->writeln("<info>Installing module: $module.</info>");
 
         $modulePath = "./src/$module";

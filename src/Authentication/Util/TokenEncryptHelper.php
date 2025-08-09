@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\Util;
 
+use function bin2hex;
+use function openssl_decrypt;
+use function openssl_encrypt;
+use function pack;
+
+use const OPENSSL_RAW_DATA;
+
 class TokenEncryptHelper
 {
     private const CIPHER = "AES-256-CTR";
@@ -19,9 +26,11 @@ class TokenEncryptHelper
      */
     public function __construct(array $config)
     {
-        $this->iv = $config['token']['encryption']['iv'];
-        $this->enabled = $config['token']['encryption']['enabled'];
-        $this->secretKey = $config['token']['encryption']['secret_key'];
+        $token = $config['authentication']['token'];
+
+        $this->iv        = $token['encryption']['iv'];
+        $this->enabled   = $token['encryption']['enabled'];
+        $this->secretKey = $token['encryption']['secret_key'];
     }
 
     /**
@@ -52,5 +61,4 @@ class TokenEncryptHelper
         }
         return openssl_decrypt(pack('H*', $data), self::CIPHER, $this->secretKey, OPENSSL_RAW_DATA, $this->iv);
     }
-
 }

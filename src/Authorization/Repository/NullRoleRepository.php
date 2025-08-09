@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authorization\Model;
+namespace Olobase\Authorization\Repository;
 
-use Laminas\Paginator\Paginator;
 use Laminas\Paginator\Adapter\ArrayAdapter;
-use Olobase\Authorization\Contract\RoleModelInterface;
+use Laminas\Paginator\Paginator;
+use Olobase\Authorization\Contract\RoleRepositoryInterface;
 
-class NullRoleModel implements RoleModelInterface
+class NullRoleRepository extends CrudRepositoryInterface implements RoleRepositoryInterface
 {
     /**
      * Find roles assigned to a user by their userId.
@@ -18,9 +18,9 @@ class NullRoleModel implements RoleModelInterface
      */
     public function findRolesByUserId(string $userId): array
     {
-        return array(
+        return [
             'user',
-        );
+        ];
     }
 
     /**
@@ -30,7 +30,7 @@ class NullRoleModel implements RoleModelInterface
      */
     public function findAll(): ?array
     {
-        return array();
+        return [];
     }
 
     /**
@@ -54,38 +54,5 @@ class NullRoleModel implements RoleModelInterface
     {
         $paginatorAdapter = new ArrayAdapter([]);
         return new Paginator($paginatorAdapter);
-    }
-
-    /**
-     * Create a new role and its associated permissions.
-     *
-     * @param array $data Role and permission data
-     * @return void
-     */
-    public function create(array $data): void
-    {
-        return;
-    }
-
-    /**
-     * Update an existing role and its associated permissions.
-     *
-     * @param array $data Role and permission data
-     * @return void
-     */
-    public function update(array $data): void
-    {
-        return;
-    }
-
-    /**
-     * Delete a role by its roleId.
-     *
-     * @param string $roleId Role ID
-     * @return void
-     */
-    public function delete(string $roleId): void
-    {
-        return;
     }
 }

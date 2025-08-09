@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Olobase\Util;
 
+use function array_map;
+use function array_slice;
+use function explode;
+use function implode;
+use function preg_replace;
+use function strtolower;
+
 class StringHelper
 {
     /**
@@ -22,7 +29,6 @@ class StringHelper
      * Format snake case strings to camel case
      *
      * @param  string $string text
-     * @return string
      */
     public static function snakeToCamel(string $string): string
     {

@@ -6,6 +6,12 @@ namespace Olobase\ModuleManager;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function file_exists;
+use function file_get_contents;
+use function is_array;
+use function json_decode;
+use function passthru;
+
 class ComposerHelper
 {
     public static function runComposerInstall(OutputInterface $output): bool
@@ -26,7 +32,7 @@ class ComposerHelper
     public static function getComposerJsonData(string $moduleFullPath)
     {
         $composerFile = $moduleFullPath . '/composer.json';
-        if (!file_exists($composerFile)) {
+        if (! file_exists($composerFile)) {
             return false;
         }
         $json = file_get_contents($composerFile);
@@ -34,5 +40,4 @@ class ComposerHelper
 
         return is_array($data) ? $data : false;
     }
-
 }

@@ -13,6 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function putenv;
+use function trim;
+
 class MigrationsMigrateCommand extends Command
 {
     protected static $defaultName = 'migrations:migrate';
@@ -31,16 +34,16 @@ class MigrationsMigrateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $module = trim($input->getOption('module') ?? '');
-        $to      = $input->getOption('to') ?? null;
-        $strict  = $input->getOption('strict') ?? false;
-        $prev    = $input->getOption('prev') ?? null;
-        $env     = $input->getOption('env');
+        $to     = $input->getOption('to') ?? null;
+        $strict = $input->getOption('strict') ?? false;
+        $prev   = $input->getOption('prev') ?? null;
+        $env    = $input->getOption('env');
 
-        if (!$module || !$env) {
+        if (! $module || ! $env) {
             $output->writeln('<error>--module and --env options are required.</error>');
             return Command::FAILURE;
         }
-        putenv('APP_ENV='.trim($env));
+        putenv('APP_ENV=' . trim($env));
 
         $conn = self::getConnection($container->get('config')['db']);
 
@@ -51,9 +54,6 @@ class MigrationsMigrateCommand extends Command
     private static function getConnection(array $laminasDbConfig): Connection
     {
         $doctrineDbConfig = DoctrineHelper::convertLaminasToDoctrineDbConfig($laminasDbConfig);
-        $conn = DriverManager::getConnection($doctrineDbConfig);
-
-        return $conn;
+        return DriverManager::getConnection($doctrineDbConfig);
     }
-
 }

@@ -1,18 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Olobase\Mapper;
 
+use OpenApi\Attributes\Property as OAProperty;
 use ReflectionClass;
 use ReflectionNamedType;
-use OpenApi\Attributes\Property as OAProperty;
-use Olobase\Exception\UncodedObjectIdException;
+use ReflectionProperty;
+
+use function is_string;
+use function json_decode;
+use function lcfirst;
+use function preg_replace;
+use function strtolower;
 
 class OutputSchemaMapper
 {
     public function map(string $schemaClass, array $row): array
     {
         $reflection = new ReflectionClass($schemaClass);
-        $viewData = [];
+        $viewData   = [];
         $properties = $reflection->getProperties();
 
         foreach ($properties as $property) {
@@ -44,7 +52,7 @@ class OutputSchemaMapper
         return $viewData;
     }
 
-    protected function detectType(\ReflectionProperty $property, ?OAProperty $oaProperty): string
+    protected function detectType(ReflectionProperty $property, ?OAProperty $oaProperty): string
     {
         // First get the PHP type hint
         $type = $property->getType();
@@ -71,12 +79,12 @@ class OutputSchemaMapper
     protected function castValue(mixed $value, string $type): mixed
     {
         return match ($type) {
-            'int' => (int)$value,
-            'integer' => (int)$value,
-            'float' => (float)$value,
-            'double' => (float)$value,
-            'bool', 'boolean' => (bool)$value,
-            'array' => is_string($value) ? json_decode($value, true) ?? [] : (array)$value,
+            'int' => (int) $value,
+            'integer' => (int) $value,
+            'float' => (float) $value,
+            'double' => (float) $value,
+            'bool', 'boolean' => (bool) $value,
+            'array' => is_string($value) ? json_decode($value, true) ?? [] : (array) $value,
             default => $value,
         };
     }

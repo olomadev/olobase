@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Olobase\Authorization\Contract;
 
-interface PermissionModelInterface
+interface PermissionRepositoryInterface
 {
     /**
      * Find permissions
-     *
-     * @return array
      */
     public function findPermissions(): array;
 }

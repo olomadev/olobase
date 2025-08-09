@@ -6,7 +6,11 @@ namespace Olobase\ModuleManager;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
+use Doctrine\Migrations\DependencyFactory;
+
+use function strtolower;
 
 class DoctrineHelper
 {
@@ -16,13 +20,13 @@ class DoctrineHelper
         $namespace    = $module . '\\Migrations';
 
         return new ConfigurationArray([
-            'migrations_paths' => [
+            'migrations_paths'        => [
                 $namespace => $migrationDir,
             ],
-            'table_storage' => [
+            'table_storage'           => [
                 'table_name' => 'migrations',
             ],
-            'all_or_nothing' => true,
+            'all_or_nothing'          => true,
             'check_database_platform' => true,
         ]);
     }
@@ -43,9 +47,16 @@ class DoctrineHelper
     public static function getConnection(array $laminasDbConfig): Connection
     {
         $doctrineDbConfig = self::convertLaminasToDoctrineDbConfig($laminasDbConfig);
-        $conn = DriverManager::getConnection($doctrineDbConfig);
-
-        return $conn;
+        return DriverManager::getConnection($doctrineDbConfig);
     }
 
+    public static function createDependencyFactory(
+        string $module,
+        array $laminasDbConfig
+    ): DependencyFactory {
+        $config     = self::createMigrationConfig($module);
+        $connection = self::getConnection($laminasDbConfig);
+
+        return DependencyFactory::fromConnection($config, new ExistingConnection($connection));
+    }
 }

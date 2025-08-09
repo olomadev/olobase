@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authorization\Service;
+namespace Olobase\Authorization;
 
 use Mezzio\Authorization\AuthorizationInterface;
 use Mezzio\Authorization\Exception;
 use Mezzio\Router\RouteResult;
+use Olobase\Authorization\Contract\PermissionRepositoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Olobase\Authorization\Contract\PermissionModelInterface;
 
-use function sprintf;
 use function in_array;
+use function sprintf;
 
 class Authorization implements AuthorizationInterface
 {
-    private $permissions = array();
+    private $permissions = [];
 
     /**
      * Constructor
      *
-     * @param PermissionModelInterface $permissionModel permissions
+     * @param PermissionRepositoryInterface $permissionRepository permissions
      */
-    public function __construct(PermissionModelInterface $permissionModel)
+    public function __construct(PermissionRepositoryInterface $permissionRepository)
     {
-        $this->permissions = $permissionModel->findPermissions();
+        $this->permissions = $permissionRepository->findPermissions();
     }
 
     /**
@@ -41,17 +41,14 @@ class Authorization implements AuthorizationInterface
                 RouteResult::class
             ));
         }
-        // No matching route. Everyone can access.
-        if ($routeResult->isFailure()) {
+        if ($routeResult->isFailure()) { // No matching route. Everyone can access.
             return true;
         }
         $permissions = $this->getPermissions($role);
         if (false == $permissions) {
             return false;
         }
-        // Check user has permission to the route
-        //
-        $routeName = $routeResult->getMatchedRouteName();
+        $routeName = $routeResult->getMatchedRouteName(); // Check user has permission to the route
         if (in_array($routeName, $permissions)) {
             return true;
         }

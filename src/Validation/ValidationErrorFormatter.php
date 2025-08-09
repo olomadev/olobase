@@ -6,6 +6,10 @@ namespace Olobase\Validation;
 
 use Laminas\InputFilter\InputFilterInterface;
 
+use function array_values;
+use function is_array;
+use function is_string;
+
 class ValidationErrorFormatter implements ValidationErrorFormatterInterface
 {
     private string $responseKey;
@@ -13,7 +17,7 @@ class ValidationErrorFormatter implements ValidationErrorFormatterInterface
 
     public function __construct(array $config = [])
     {
-        $this->responseKey = $config['response_key'];
+        $this->responseKey   = $config['response_key'];
         $this->multipleError = $config['multiple_error'];
     }
 
@@ -28,9 +32,9 @@ class ValidationErrorFormatter implements ValidationErrorFormatterInterface
         foreach ($inputFilter->getInvalidInput() as $field => $input) {
             $getMessages = $input->getMessages();
 
-            if (!$this->multipleError) {
+            if (! $this->multipleError) {
                 $errors = array_values($getMessages);
-                if (!empty($errors[0])) {
+                if (! empty($errors[0])) {
                     $response[$this->responseKey]['error'] = $errors[0];
                     break;
                 }

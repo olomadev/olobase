@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\JwtAuth;
 
-use Psr\Http\Message\ServerRequestInterface;
-use Mezzio\Authentication\UserInterface;
 use Mezzio\Authentication\AuthenticationInterface;
+use Mezzio\Authentication\UserInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface JwtAuthenticationInterface extends AuthenticationInterface
 {
@@ -14,7 +14,6 @@ interface JwtAuthenticationInterface extends AuthenticationInterface
      * Executes database query for authentication and if the operation is successful, returns to User class.
      *
      * @param  ServerRequestInterface $request request
-     * @return UserInterface
      */
     public function authenticateWithCredentials(ServerRequestInterface $request): ?UserInterface;
 
@@ -34,10 +33,8 @@ interface JwtAuthenticationInterface extends AuthenticationInterface
 
     /**
      * Returns to defined error message templates for error codes.
-     *
-     * @return array
      */
-    public function getMessageTemplates() : array;
+    public function getMessageTemplates(): array;
 
     /**
      * Returns to  latest error key
@@ -49,6 +46,7 @@ interface JwtAuthenticationInterface extends AuthenticationInterface
     /**
      * Returns to latest error code
      * ,
+     *
      * @return string|null
      */
     public function getCode();

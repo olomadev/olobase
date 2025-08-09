@@ -38,15 +38,11 @@ interface ColumnFiltersInterface
 
     /**
      * Set like columns
-     *
-     * @param array $columns
      */
     public function setLikeColumns(array $columns);
 
     /**
      * Set where columns
-     *
-     * @param array $columns
      */
     public function setWhereColumns(array $columns);
 
@@ -76,15 +72,11 @@ interface ColumnFiltersInterface
 
     /**
      * Returns to normalized data
-     *
-     * @return array
      */
     public function getRawData(): array;
 
     /**
      * Set filter data (GET or POST)
-     *
-     * @param array $data
      */
     public function setData(array $data);
 
@@ -99,100 +91,71 @@ interface ColumnFiltersInterface
 
     /**
      * Returns to "like" data column => value
-     *
-     * @return array
      */
     public function getLikeData(): array;
 
     /**
      * Returns to "where" data column => value
-     *
-     * @return array
      */
     public function getWhereData(): array;
 
     /**
      * Returns to unfiltered data
-     *
-     * @return array
      */
     public function getData(): array;
 
     /**
      * Returns to filtered order data: [name ASC, email DESC]
-     *
-     * @return array
      */
     public function getOrderData(): array;
 
     /**
      * Returns to search data: columns => array('str1', 'str2')
-     *
-     * @return array
      */
     public function getSearchData(): array;
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function searchDataIsNotEmpty(): bool;
 
     /**
      * Returns to true if empty otherwise false
-     *
-     * @return boolean
      */
     public function searchDataEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function likeDataIsEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function likeDataIsNotEmpty(): bool;
 
     /**
      * Returns to true if empty otherwise false
-     *
-     * @return boolean
      */
     public function whereDataIsEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function whereDataIsNotEmpty(): bool;
 
     /**
      * Returns to true if empty otherwise false
-     *
-     * @return boolean
      */
     public function orderDataIsEmpty(): bool;
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function orderDataIsNotEmpty(): bool;
 
     /**
      * Returns to colum names
-     *
-     * @return array
      */
     public function getColumns(): array;
-
 }

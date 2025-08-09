@@ -5,44 +5,43 @@ declare(strict_types=1);
 namespace Olobase\Validator;
 
 use Exception;
-use League\MimeTypeDetection\FinfoMimeTypeDetector;
 use Laminas\Validator\AbstractValidator;
+use League\MimeTypeDetection\FinfoMimeTypeDetector;
+
+use function in_array;
+use function mb_strlen;
 
 /**
  * Validate multiple file input array
  */
 class MultipleBlobFileValidator extends AbstractValidator
 {
-    public const EMPTY_FILE_ID = 'emptyFileId';
-    public const EMPTY_FILE_CONTENT = 'emptyFileContent';
-    public const EMPTY_MIME_TYPES_OPTION = 'emptyFileMimeTypesOption';
-    public const INVALID_FILE_CONTENT = 'invalidBinaryContent';
-    public const INVALID_FILE_MIME_TYPE = 'invalidFileMimeType';
+    public const EMPTY_FILE_ID                  = 'emptyFileId';
+    public const EMPTY_FILE_CONTENT             = 'emptyFileContent';
+    public const EMPTY_MIME_TYPES_OPTION        = 'emptyFileMimeTypesOption';
+    public const INVALID_FILE_CONTENT           = 'invalidBinaryContent';
+    public const INVALID_FILE_MIME_TYPE         = 'invalidFileMimeType';
     public const MAX_ALLOWED_UPLOAD_SIZE_EXCEED = 'exceedAllowedUploadSize';
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $messageTemplates = [
-        self::EMPTY_FILE_ID => 'Empty file id',
-        self::EMPTY_FILE_CONTENT => 'Empty file content',
-        self::EMPTY_MIME_TYPES_OPTION => 'Empty file "mime_types" option',
-        self::INVALID_FILE_CONTENT => 'Invalid file content',
-        self::INVALID_FILE_MIME_TYPE => 'Invalid file MIME type',
+        self::EMPTY_FILE_ID                  => 'Empty file id',
+        self::EMPTY_FILE_CONTENT             => 'Empty file content',
+        self::EMPTY_MIME_TYPES_OPTION        => 'Empty file "mime_types" option',
+        self::INVALID_FILE_CONTENT           => 'Invalid file content',
+        self::INVALID_FILE_MIME_TYPE         => 'Invalid file MIME type',
         self::MAX_ALLOWED_UPLOAD_SIZE_EXCEED => 'Max allowed upload size exceeded',
     ];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $messageVariables = [
         'max_allowed_upload' => ['options' => 'max_allowed_upload'],
-        'mime_types' => ['options' => 'mime_types'],
+        'mime_types'         => ['options' => 'mime_types'],
     ];
 
     protected $options = [
-        'operation' => '',
-        'mime_types' => [],
+        'operation'          => '',
+        'mime_types'         => [],
         'max_allowed_upload' => 10 * 1024 * 1024, // 10 MB varsayılan değer
     ];
 
@@ -54,9 +53,9 @@ class MultipleBlobFileValidator extends AbstractValidator
      */
     public function isValid($value)
     {
-        $maxAllowedUpload = (int) ($this->options['max_allowed_upload'] ?? 10 * 1024 * 1024);
+        $maxAllowedUpload     = (int) ($this->options['max_allowed_upload'] ?? 10 * 1024 * 1024);
         $allowedFileMimeTypes = (array) ($this->options['mime_types'] ?? []);
-        $operation = (string) ($this->options['operation'] ?? '');
+        $operation            = (string) ($this->options['operation'] ?? '');
 
         if (empty($allowedFileMimeTypes)) {
             $this->error(self::EMPTY_MIME_TYPES_OPTION);
@@ -89,10 +88,10 @@ class MultipleBlobFileValidator extends AbstractValidator
 
             // MIME type detection and control
             try {
-                $detector = new FinfoMimeTypeDetector();
+                $detector     = new FinfoMimeTypeDetector();
                 $realMimeType = $detector->detectMimeTypeFromBuffer($binaryContent);
 
-                if (!$realMimeType || !in_array($realMimeType, $allowedFileMimeTypes, true)) {
+                if (! $realMimeType || ! in_array($realMimeType, $allowedFileMimeTypes, true)) {
                     $this->error(self::INVALID_FILE_MIME_TYPE);
                     return false;
                 }

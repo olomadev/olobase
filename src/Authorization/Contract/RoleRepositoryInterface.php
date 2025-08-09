@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Olobase\Authorization\Contract;
 
 use Laminas\Paginator\Paginator;
+use Olobase\Repository\CrudRepositoryInterface;
 
-interface RoleModelInterface
+interface RoleRepositoryInterface extends CrudRepositoryInterface
 {
     /**
      * Find roles assigned to a user by their userId.
@@ -29,7 +30,7 @@ interface RoleModelInterface
      * @param string $roleId Role ID
      * @return array Role details with permissions
      */
-    public function findOneById(string $roleId);
+    public function findById(string $roleId);
 
     /**
      * Find all roles by pagination
@@ -38,28 +39,4 @@ interface RoleModelInterface
      * @return Laminas\Paginator\Paginator
      */
     public function findAllByPaging(array $get): Paginator;
-
-    /**
-     * Create a new role and its associated permissions.
-     *
-     * @param array $data Role and permission data
-     * @return void
-     */
-    public function create(array $data): void;
-
-    /**
-     * Update an existing role and its associated permissions.
-     *
-     * @param array $data Role and permission data
-     * @return void
-     */
-    public function update(array $data): void;
-
-    /**
-     * Delete a role by its roleId.
-     *
-     * @param string $roleId Role ID
-     * @return void
-     */
-    public function delete(string $roleId): void;
 }

@@ -4,19 +4,42 @@ declare(strict_types=1);
 
 namespace Olobase\ModuleManager\Command;
 
-use RuntimeException;
-use Olobase\ModuleManager\DoctrineHelper;
 use Olobase\ModuleManager\ComposerHelper;
-use Olobase\ModuleManager\ModuleMigrationRunner;
+use Olobase\ModuleManager\DoctrineHelper;
 use Olobase\ModuleManager\ModuleComposerScriptRunner;
+use Olobase\ModuleManager\ModuleMigrationRunner;
+use RuntimeException;
+use stdClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
+
+use function array_filter;
+use function array_map;
+use function array_search;
+use function array_values;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function implode;
+use function in_array;
+use function is_array;
+use function json_decode;
+use function json_encode;
+use function passthru;
+use function putenv;
+use function str_ends_with;
+use function trim;
+use function unlink;
+
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
 
 class ModuleRemoveCommand extends Command
 {
-    protected $config = array();
+    protected $config             = [];
     protected static $defaultName = 'module:remove';
 
     public function setConfig(array $config)
@@ -32,13 +55,12 @@ class ModuleRemoveCommand extends Command
             ->addOption('env', null, InputOption::VALUE_REQUIRED, 'Environment');
     }
 
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $module = trim((string)$input->getOption('name'));
-        $env = $input->getOption('env');
+        $module = trim((string) $input->getOption('name'));
+        $env    = $input->getOption('env');
 
-        if (!$module || !$env) {
+        if (! $module || ! $env) {
             $output->writeln('<error>--module and --env options are required.</error>');
             return Command::FAILURE;
         }
@@ -48,20 +70,9 @@ class ModuleRemoveCommand extends Command
         try {
             $visited = [];
             $this->removeModule($module, $env, $output, $visited);
-
-            $modulesConfigFile = APP_ROOT . '/config/module.config.php';
-            $currentModules = (array)($this->config['modules'] ?? []);
-            $newModules = array_diff($currentModules, $visited);
-
-            if (empty($newModules)) {
-                file_put_contents($modulesConfigFile, "<?php\n\nreturn [];\n");
-            } else {
-                file_put_contents($modulesConfigFile, "<?php\n\nreturn [\n    " . implode(",\n    ", array_map(fn ($m) => "'$m'", $newModules)) . "\n];\n");
-            }
-
             $output->writeln("<info>Module $module removed successfully (with dependencies).</info>");
             return Command::SUCCESS;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $output->writeln("<error>Error: {$e->getMessage()}</error>");
             return Command::FAILURE;
         }
@@ -76,7 +87,7 @@ class ModuleRemoveCommand extends Command
         $visited[] = $module;
 
         // 1. Check if already installed in module.config.php
-        $modulesConfig = (array)$this->config['modules'];
+        $modulesConfig = (array) $this->config['modules'];
         if (! in_array($module, $modulesConfig, true)) {
             $output->writeln("<info>Module '$module' already removed. Skipping.</info>");
             return;
@@ -86,9 +97,9 @@ class ModuleRemoveCommand extends Command
         $composerJsonPath = APP_ROOT . "/src/$module/composer.json";
         if (file_exists($composerJsonPath)) {
             $composerJson = json_decode(file_get_contents($composerJsonPath), true);
-            $extra = $composerJson['extra'] ?? [];
+            $extra        = $composerJson['extra'] ?? [];
 
-            if (!empty($extra['olobase-module-dependencies']) && is_array($extra['olobase-module-dependencies'])) {
+            if (! empty($extra['olobase-module-dependencies']) && is_array($extra['olobase-module-dependencies'])) {
                 foreach ($extra['olobase-module-dependencies'] as $dependency => $v) {
                     $output->writeln("<info>Removing dependency: $dependency (required by $module)</info>");
                     $this->removeModule($dependency, $env, $output, $visited);
@@ -104,12 +115,12 @@ class ModuleRemoveCommand extends Command
 
     private function performModuleRemove(string $module, string $env, OutputInterface $output)
     {
-        $modulesConfig = (array)$this->config['modules'];
-        $key = array_search($module, $modulesConfig);
+        $modulesConfig = (array) $this->config['modules'];
+        $key           = array_search($module, $modulesConfig);
         unset($modulesConfig[$key]);
 
-        $composerJsonFile = APP_ROOT . '/composer.json';
-        $composerLockFile = APP_ROOT . '/composer.lock';
+        $composerJsonFile  = APP_ROOT . '/composer.json';
+        $composerLockFile  = APP_ROOT . '/composer.lock';
         $modulesConfigFile = APP_ROOT . '/config/module.config.php';
 
         // Mezzio deregister
@@ -122,7 +133,7 @@ class ModuleRemoveCommand extends Command
                 "[FAIL] Module $module could not be unregistered."
             );
         }
-        $modulePath = "./src/$module";
+        $modulePath     = "./src/$module";
         $moduleFullPath = APP_ROOT . "/$modulePath";
         $moduleJsonData = ComposerHelper::getComposerJsonData($moduleFullPath);
         $moduleFullName = $moduleJsonData['name'] ?? null;
@@ -130,13 +141,12 @@ class ModuleRemoveCommand extends Command
         // Read the composer.json
         $composerJson = json_decode(file_get_contents($composerJsonFile), true);
         $repositories = $composerJson['repositories'] ?? [];
-        $require = $composerJson['require'] ?? [];
-
+        $require      = $composerJson['require'] ?? [];
 
         // Remove from repositories
-        $repositories = array_filter(
+        $repositories                 = array_filter(
             $repositories,
-            fn ($repo) => !(
+            fn ($repo) => ! (
                 isset($repo['url'])
                 && (
                     $repo['url'] === "./src/$module"
@@ -177,7 +187,7 @@ class ModuleRemoveCommand extends Command
 
         // We need to make sure that the empty autoload "psr-4" content is an object.
         if (empty($composerJson['autoload-dev']['psr-4'])) {
-            $composerJson['autoload-dev']['psr-4'] = new \stdClass();
+            $composerJson['autoload-dev']['psr-4'] = new stdClass();
         }
 
         // Save updated composer.json
@@ -203,7 +213,7 @@ class ModuleRemoveCommand extends Command
         // Running rollback migrations ...
         $output->writeln("<info>Running rollback migrations for module: $module</info>");
 
-        $conn = DoctrineHelper::getConnection($this->config['db']);
+        $conn      = DoctrineHelper::getConnection($this->config['db']);
         $migration = new ModuleMigrationRunner($output);
         $migration->command('remove');
         $return = $migration->run($module, $conn);  // down migrations ..
@@ -223,5 +233,4 @@ class ModuleRemoveCommand extends Command
 
         return Command::FAILURE;
     }
-
 }

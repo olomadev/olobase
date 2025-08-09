@@ -4,27 +4,40 @@ declare(strict_types=1);
 
 namespace Olobase\DataTable;
 
+use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Sql\Expression;
 use Laminas\Db\Sql\SqlInterface;
-use Laminas\Db\Adapter\AdapterInterface;
 use Olobase\Exception\MethodMandatoryException;
+
+use function array_key_exists;
+use function array_map;
+use function explode;
+use function in_array;
+use function is_array;
+use function is_null;
+use function is_string;
+use function sprintf;
+use function str_replace;
+use function strlen;
+use function strtolower;
+use function vsprintf;
 
 class ColumnFilters implements ColumnFiltersInterface
 {
     protected $adapter;
     protected $select;
-    protected $data = array();
-    protected $alias = array();
-    protected $columns = array();
-    protected $groupedColumns = array();
-    protected $columnData = array();
-    protected $searchData = array();
-    protected $likeColumns = array();
-    protected $whereColumns = array();
-    protected $searchColumns = array();
-    protected $likeData = array();
-    protected $whereData = array();
-    protected $orderData = array();
+    protected $data           = [];
+    protected $alias          = [];
+    protected $columns        = [];
+    protected $groupedColumns = [];
+    protected $columnData     = [];
+    protected $searchData     = [];
+    protected $likeColumns    = [];
+    protected $whereColumns   = [];
+    protected $searchColumns  = [];
+    protected $likeData       = [];
+    protected $whereData      = [];
+    protected $orderData      = [];
 
     /**
      * Constructor
@@ -41,16 +54,16 @@ class ColumnFilters implements ColumnFiltersInterface
      */
     public function clear()
     {
-        $this->data = array();
-        $this->columns = array();
-        $this->groupedColumns = array();
-        $this->alias = array();
-        $this->columnData = array();
-        $this->searchData = array();
-        $this->likeColumns = array();
-        $this->whereColumns = array();
-        $this->searchColumns = array();
-        $this->orderData = array();
+        $this->data           = [];
+        $this->columns        = [];
+        $this->groupedColumns = [];
+        $this->alias          = [];
+        $this->columnData     = [];
+        $this->searchData     = [];
+        $this->likeColumns    = [];
+        $this->whereColumns   = [];
+        $this->searchColumns  = [];
+        $this->orderData      = [];
         return $this;
     }
 
@@ -83,46 +96,40 @@ class ColumnFilters implements ColumnFiltersInterface
     public function setColumns(array $columns)
     {
         foreach ($columns as $name) {
-            $this->columns[(string)$name] = (string)$name;
+            $this->columns[(string) $name] = (string) $name;
         }
         return $this;
     }
 
     /**
      * Set search columns
-     *
-     * @param array $columns
      */
     public function setSearchColumns(array $columns)
     {
         foreach ($columns as $name) {
-            $this->searchColumns[(string)$name] = (string)$name;
+            $this->searchColumns[(string) $name] = (string) $name;
         }
         return $this;
     }
 
     /**
      * Set like columns
-     *
-     * @param array $columns
      */
     public function setLikeColumns(array $columns)
     {
         foreach ($columns as $name) {
-            $this->likeColumns[(string)$name] = (string)$name;
+            $this->likeColumns[(string) $name] = (string) $name;
         }
         return $this;
     }
 
     /**
      * Set where columns
-     *
-     * @param array $columns
      */
     public function setWhereColumns(array $columns)
     {
         foreach ($columns as $name) {
-            $this->whereColumns[(string)$name] = (string)$name;
+            $this->whereColumns[(string) $name] = (string) $name;
         }
         return $this;
     }
@@ -151,9 +158,9 @@ class ColumnFilters implements ColumnFiltersInterface
         if ($alias instanceof Expression) {
             $values = $alias->getExpressionData();
             if (is_array($values[0]) && empty($values[0][1])) {
-                $quotedValues = array_map(
+                $quotedValues       = array_map(
                     function ($v) {
-                        return is_string($v) ? "'".$v."'" : $v;
+                        return is_string($v) ? "'" . $v . "'" : $v;
                     },
                     $values[0][1]
                 );
@@ -181,13 +188,13 @@ class ColumnFilters implements ColumnFiltersInterface
     ) {
         if (is_null($returnFunc)) {
             $returnFunc = function ($val) {
-                return (bool)$val;
+                return (bool) $val;
             };
         }
         foreach ($columns as $name) {
             $this->groupedColumns[$name] = [
                 'groupName' => $groupName,
-                'callable' => $returnFunc
+                'callable'  => $returnFunc,
             ];
         }
         return $this;
@@ -195,13 +202,11 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to normalized data
-     *
-     * @return array
      */
     public function getRawData(): array
     {
-        $data = $this->getData();
-        $newData = array();
+        $data    = $this->getData();
+        $newData = [];
         if (! empty($this->columns)) {
             foreach ($this->columns as $name => $value) {
                 if (empty($name)) {
@@ -217,72 +222,61 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Set filter data (GET or POST)
-     *
-     * @param array $data
      */
     public function setData(array $data)
     {
-        $searchWords = array();
+        $searchWords = [];
         if (! empty($data['q']) && strlen($data['q']) > 0) {
-            $searchStr = $data['q'];
+            $searchStr   = $data['q'];
             $searchWords = explode(' ', $searchStr);
         }
         $this->data = $data;
-        $platform = $this->adapter->getPlatform();
-        //
+        $platform   = $this->adapter->getPlatform();
         // Search data
-        //
         foreach ($this->searchColumns as $name) {
             if (! empty($searchWords)) {  // search data for all columns
                 if (array_key_exists($name, $this->alias)) { // sql function support
                     $this->searchData[$this->alias[$name]] = $searchWords;
                 } else {
-                    $colName = $platform->quoteIdentifier($name);
+                    $colName                    = $platform->quoteIdentifier($name);
                     $this->searchData[$colName] = $searchWords;
                 }
             }
         }
         unset($name);
-        //
         // Like data
-        //
         foreach ($this->likeColumns as $name) {
             if (array_key_exists($name, $data)) {
                 $this->setColumnData($name, $data[$name], 'like');
             }
         }
         unset($name);
-        //
         // Where data
-        //
         foreach ($this->whereColumns as $name) {
             if (array_key_exists($name, $data)) {
                 $this->setColumnData($name, $data[$name], 'where');
             }
         }
-        //
         // Grouped where data
-        //
         unset($name);
         foreach ($this->groupedColumns as $name => $props) {
             $groupName = $props['groupName'];
-            if (false == empty($data[$groupName])
+            if (
+                false == empty($data[$groupName])
                 && in_array($name, $data[$groupName])
             ) {
                 $returnClosure = $props['callable'];
                 $this->setColumnData($name, $returnClosure($name), 'where');
             }
         }
-        //
         // Sort data
-        //
         if (! empty($data['_sort'])) {
             $o = 0;
             foreach ($data['_sort'] as $colName) {
                 if (false == empty($colName) && isset($this->columns[$colName]) && false == empty($data['_order'])) {
-                    $direction = (strtolower($data['_order'][$o]) == 'asc') ? 'ASC' : 'DESC';
-                    $formattedColName = empty($this->alias[$colName]) ? $colName : $this->alias[$colName];
-                    $this->orderData[$o] = $formattedColName.' '.$direction;
+                    $direction           = strtolower($data['_order'][$o]) == 'asc' ? 'ASC' : 'DESC';
+                    $formattedColName    = empty($this->alias[$colName]) ? $colName : $this->alias[$colName];
+                    $this->orderData[$o] = $formattedColName . ' ' . $direction;
                     ++$o;
                 }
             }
@@ -307,26 +301,26 @@ class ColumnFilters implements ColumnFiltersInterface
             $funcName = $this->alias[$name];
             switch ($value) { // boolean support
                 case 'true':
-                    $this->{$direction."Data"}[$funcName] = 1;
+                    $this->{$direction . "Data"}[$funcName] = 1;
                     break;
                 case 'false':
-                    $this->{$direction."Data"}[$funcName] = 0;
+                    $this->{$direction . "Data"}[$funcName] = 0;
                     break;
                 default:
-                    $this->{$direction."Data"}[$funcName] = self::normalizeData($colValue);
+                    $this->{$direction . "Data"}[$funcName] = self::normalizeData($colValue);
                     break;
             }
         } else {
             $colName = $platform->quoteIdentifier($name);
             switch ($value) { // boolean support
                 case 'true':
-                    $this->{$direction."Data"}[$colName] = 1;
+                    $this->{$direction . "Data"}[$colName] = 1;
                     break;
                 case 'false':
-                    $this->{$direction."Data"}[$colName] = 0;
+                    $this->{$direction . "Data"}[$colName] = 0;
                     break;
                 default:
-                    $this->{$direction."Data"}[$colName] = self::normalizeData($colValue);
+                    $this->{$direction . "Data"}[$colName] = self::normalizeData($colValue);
                     break;
             }
         }
@@ -345,19 +339,18 @@ class ColumnFilters implements ColumnFiltersInterface
         $data = $this->getData();
 
         $dateColumn = $dateColumnName;
-        $endDate = $endDateColumnName;
-        $fixedDate = $fixedDateColumnName;
+        $endDate    = $endDateColumnName;
+        $fixedDate  = $fixedDateColumnName;
         if (isset($this->alias[$dateColumnName])) {
             $dateColumn = $this->alias[$dateColumnName];
         }
         if (isset($this->alias[$endDate])) {
             $endDate = $this->alias[$endDate];
         }
-        $columnStart = $dateColumnName.'Start';
-        $columnEnd = $dateColumnName.'End';
+        $columnStart = $dateColumnName . 'Start';
+        $columnEnd   = $dateColumnName . 'End';
 
         // "between" date filter
-        //
         if (empty($endDateColumnName)) {
             $dateColumn = self::removeQuotes($dateColumn);
             if (! empty($data[$columnStart]) && empty($data[$columnEnd])) {
@@ -375,10 +368,10 @@ class ColumnFilters implements ColumnFiltersInterface
             }
         } else {  // equality & fixed date filter
             $columnStart = $dateColumn;
-            $columnEnd = $endDate;
-            $startKey = self::removeQuotes($columnStart);
-            $endKey = self::removeQuotes($columnEnd);
-            $fixedKey = self::removeQuotes($fixedDate);
+            $columnEnd   = $endDate;
+            $startKey    = self::removeQuotes($columnStart);
+            $endKey      = self::removeQuotes($columnEnd);
+            $fixedKey    = self::removeQuotes($fixedDate);
             if ($fixedDate && ! empty($data[$fixedKey])) {
                 $nest = $this->select->where->nest();
                 $nest->and->lessThanOrEqualTo($columnStart, $data[$fixedKey])
@@ -422,8 +415,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to filtered column => value
-     *
-     * @return array
      */
     public function getColumnData(): array
     {
@@ -432,8 +423,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to "like" data column => value
-     *
-     * @return array
      */
     public function getLikeData(): array
     {
@@ -442,8 +431,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to "where" data column => value
-     *
-     * @return array
      */
     public function getWhereData(): array
     {
@@ -452,8 +439,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to unfiltered data
-     *
-     * @return array
      */
     public function getData(): array
     {
@@ -462,8 +447,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to filtered order data: [name ASC, email DESC]
-     *
-     * @return array
      */
     public function getOrderData(): array
     {
@@ -472,8 +455,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to search data: columns => array('str1', 'str2')
-     *
-     * @return array
      */
     public function getSearchData(): array
     {
@@ -482,8 +463,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function searchDataIsNotEmpty(): bool
     {
@@ -496,8 +475,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if empty otherwise false
-     *
-     * @return boolean
      */
     public function searchDataEmpty(): bool
     {
@@ -510,8 +487,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function likeDataIsEmpty(): bool
     {
@@ -524,8 +499,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function likeDataIsNotEmpty(): bool
     {
@@ -538,8 +511,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if empty otherwise false
-     *
-     * @return boolean
      */
     public function whereDataIsEmpty(): bool
     {
@@ -549,10 +520,9 @@ class ColumnFilters implements ColumnFiltersInterface
         }
         return false;
     }
+
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function whereDataIsNotEmpty(): bool
     {
@@ -565,8 +535,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if empty otherwise false
-     *
-     * @return boolean
      */
     public function orderDataIsEmpty(): bool
     {
@@ -579,8 +547,6 @@ class ColumnFilters implements ColumnFiltersInterface
 
     /**
      * Returns to true if not empty otherwise false
-     *
-     * @return boolean
      */
     public function orderDataIsNotEmpty(): bool
     {
@@ -599,15 +565,13 @@ class ColumnFilters implements ColumnFiltersInterface
     protected static function removeQuotes($key)
     {
         if (is_string($key)) {
-            $key = str_replace(["'","`",'"'], "", $key);
+            $key = str_replace(["'", "`", '"'], "", $key);
         }
         return $key;
     }
 
     /**
      * Returns to colum names
-     *
-     * @return array
      */
     public function getColumns(): array
     {
@@ -622,7 +586,7 @@ class ColumnFilters implements ColumnFiltersInterface
      */
     protected static function normalizeData($data)
     {
-        $newData = array();
+        $newData = [];
         if (is_array($data) && false == empty($data[0]['id'])) {
             $i = 0;
             foreach ($data as $val) {
@@ -635,5 +599,4 @@ class ColumnFilters implements ColumnFiltersInterface
         }
         return $data;
     }
-
 }

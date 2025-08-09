@@ -6,6 +6,25 @@ namespace Olobase\Util;
 
 use Olobase\Exception\JsonDecodeException;
 
+use function is_string;
+use function json_decode;
+use function json_encode;
+use function json_last_error;
+use function sprintf;
+use function strpos;
+use function trim;
+
+use const JSON_ERROR_CTRL_CHAR;
+use const JSON_ERROR_DEPTH;
+use const JSON_ERROR_INF_OR_NAN;
+use const JSON_ERROR_NONE;
+use const JSON_ERROR_RECURSION;
+use const JSON_ERROR_SYNTAX;
+use const JSON_ERROR_UNSUPPORTED_TYPE;
+use const JSON_ERROR_UTF8;
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
+
 class JsonHelper
 {
     /**
@@ -22,14 +41,14 @@ class JsonHelper
         }
 
         $decodedValue = json_decode($data, true);
-        $lastError = json_last_error();
-        $jsonErrors = [
-            JSON_ERROR_DEPTH => 'Maximum stack depth exceeded',
-            JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
-            JSON_ERROR_SYNTAX => 'Syntax error',
-            JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded',
-            JSON_ERROR_RECURSION => 'Recursion detected',
-            JSON_ERROR_INF_OR_NAN => 'Inf and NaN cannot be JSON encoded',
+        $lastError    = json_last_error();
+        $jsonErrors   = [
+            JSON_ERROR_DEPTH            => 'Maximum stack depth exceeded',
+            JSON_ERROR_CTRL_CHAR        => 'Control character error, possibly incorrectly encoded',
+            JSON_ERROR_SYNTAX           => 'Syntax error',
+            JSON_ERROR_UTF8             => 'Malformed UTF-8 characters, possibly incorrectly encoded',
+            JSON_ERROR_RECURSION        => 'Recursion detected',
+            JSON_ERROR_INF_OR_NAN       => 'Inf and NaN cannot be JSON encoded',
             JSON_ERROR_UNSUPPORTED_TYPE => 'Unsupported type',
         ];
 
@@ -47,7 +66,6 @@ class JsonHelper
      * Encode json
      *
      * @param  mixed $value val
-     * @return string
      */
     public static function jsonEncode($value): string
     {
@@ -62,7 +80,6 @@ class JsonHelper
      * Paginator json decode
      *
      * @param  object|array $items   data
-     * @return array
      */
     public static function paginatorJsonDecode($items): array
     {
@@ -71,18 +88,18 @@ class JsonHelper
         }
 
         $jsonErrors = [
-            JSON_ERROR_DEPTH => 'Maximum heap size exceeded',
+            JSON_ERROR_DEPTH     => 'Maximum heap size exceeded',
             JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
-            JSON_ERROR_SYNTAX => 'Syntax error',
+            JSON_ERROR_SYNTAX    => 'Syntax error',
         ];
 
         $newData = [];
         foreach ($items as $key => $row) {
             foreach ($row as $field => $value) {
                 if (is_string($value) && (strpos($value, '[{"') === 0 || strpos($value, '{"') === 0)) {  // if json encoded value
-                    $decodedValue = json_decode($value, true);
-                    $lastError = json_last_error();
-                    $newData[$key][$field] = ($lastError === JSON_ERROR_NONE) ? $decodedValue : $jsonErrors[$lastError] . ': ' . $value;
+                    $decodedValue          = json_decode($value, true);
+                    $lastError             = json_last_error();
+                    $newData[$key][$field] = $lastError === JSON_ERROR_NONE ? $decodedValue : $jsonErrors[$lastError] . ': ' . $value;
                 } else {
                     $newData[$key][$field] = $value;
                 }

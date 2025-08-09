@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Olobase\Authentication\JwtAuth;
 
-use Psr\Http\Message\ServerRequestInterface;
 use Olobase\Authentication\Util\TokenEncryptHelper;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface TokenInterface
 {
@@ -25,7 +25,7 @@ interface TokenInterface
      * @return array|boolean
      */
     public function generateToken(ServerRequestInterface $request, ?int $expiration = null);
-    
+
     /**
      * Refresh token
      *
@@ -38,8 +38,18 @@ interface TokenInterface
 
     /**
      * Returns the token encryption helper object
-     *
-     * @return TokenEncryptHelper
      */
     public function getTokenEncryptHelper(): TokenEncryptHelper;
+
+    /**
+     * Set user ip adress
+     *
+     * @param string $ipAddress ip address
+     */
+    public function setIpAddress(string $ipAddress);
+
+    /**
+     * Returns to user ip address
+     */
+    public function getIpAddress(): string;
 }

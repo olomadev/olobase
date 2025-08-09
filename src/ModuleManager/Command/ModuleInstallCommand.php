@@ -4,19 +4,43 @@ declare(strict_types=1);
 
 namespace Olobase\ModuleManager\Command;
 
-use RuntimeException;
-use Olobase\ModuleManager\DoctrineHelper;
 use Olobase\ModuleManager\ComposerHelper;
-use Olobase\ModuleManager\ModuleMigrationRunner;
+use Olobase\ModuleManager\DoctrineHelper;
 use Olobase\ModuleManager\ModuleComposerScriptRunner;
+use Olobase\ModuleManager\ModuleMigrationRunner;
+use RuntimeException;
+use stdClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
+
+use function array_key_exists;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function array_values;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_object;
+use function json_decode;
+use function json_encode;
+use function passthru;
+use function putenv;
+use function trim;
+use function unlink;
+
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
 
 class ModuleInstallCommand extends Command
 {
-    protected $config = array();
+    protected $config             = [];
     protected static $defaultName = 'module:install';
 
     public function setConfig(array $config)
@@ -35,30 +59,22 @@ class ModuleInstallCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $module = trim((string)$input->getOption('name'));
-        $env = $input->getOption('env');
+        $module  = trim((string) $input->getOption('name'));
+        $env     = $input->getOption('env');
         $version = $input->getOption('v');
 
-        if (!$module || !$env) {
+        if (! $module || ! $env) {
             $output->writeln('<error>--module and --env options are required.</error>');
             return Command::FAILURE;
         }
-        putenv('APP_ENV='.trim($env));
+        putenv('APP_ENV=' . trim($env));
 
         try {
             $visited = [];
             $this->installModule($module, $env, $output, $visited, $version);
-
-            // Save final modules.config.php with all visited modules
-            $modulesConfigFile = APP_ROOT . '/config/module.config.php';
-            file_put_contents(
-                $modulesConfigFile,
-                "<?php\n\nreturn [\n    " . implode(",\n    ", array_map(fn ($m) => "'$m'", $visited)) . "\n];\n"
-            );
-
             $output->writeln("<info>Module $module installed successfully (with dependencies).</info>");
             return Command::SUCCESS;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $output->writeln("<error>Error: {$e->getMessage()}</error>");
             return Command::FAILURE;
         }
@@ -76,7 +92,7 @@ class ModuleInstallCommand extends Command
         $visited[] = $module;
 
         // 1. Check if already installed in module.config.php
-        $modulesConfig = (array)$this->config['modules'];
+        $modulesConfig = (array) $this->config['modules'];
         if (in_array($module, $modulesConfig, true)) {
             $output->writeln("<info>Module '$module' already installed. Skipping.</info>");
             return;
@@ -86,9 +102,9 @@ class ModuleInstallCommand extends Command
         $composerJsonPath = APP_ROOT . "/src/$module/composer.json";
         if (file_exists($composerJsonPath)) {
             $composerJson = json_decode(file_get_contents($composerJsonPath), true);
-            $extra = $composerJson['extra'] ?? [];
+            $extra        = $composerJson['extra'] ?? [];
 
-            if (!empty($extra['olobase-module-dependencies']) && is_array($extra['olobase-module-dependencies'])) {
+            if (! empty($extra['olobase-module-dependencies']) && is_array($extra['olobase-module-dependencies'])) {
                 foreach ($extra['olobase-module-dependencies'] as $dependency => $v) {
                     $output->writeln("<info>Resolving dependency: $dependency (required by $module)</info>");
                     $this->installModule($dependency, $env, $output, $visited, $v);
@@ -104,108 +120,100 @@ class ModuleInstallCommand extends Command
 
     private function performModuleInstallation(string $module, string $env, OutputInterface $output, $version = null): void
     {
-        $composerJsonFile = APP_ROOT . '/composer.json';
-        $composerLockFile = APP_ROOT . '/composer.lock';
+        $composerJsonFile  = APP_ROOT . '/composer.json';
+        $composerLockFile  = APP_ROOT . '/composer.lock';
         $modulesConfigFile = APP_ROOT . '/config/module.config.php';
+        $modulePath        = "./src/$module";
+        $moduleFullPath    = APP_ROOT . "/$modulePath";
 
-        // Mezzio register
+        // 1. mezzio register
         passthru("composer mezzio mezzio:module:register $module --ansi", $exitCode);
-
         if ($exitCode === 0) {
             $output->writeln("<info>[OK] Module $module registered via `mezzio:module:register`.</info>");
         } else {
-            throw new RuntimeException(
-                "[FAIL] Module $module could not be registered using mezzio:module:register."
-            );
+            throw new RuntimeException("[FAIL] Module $module could not be registered using mezzio:module:register.");
         }
 
-        // Read the composer.json
+        // 2. install composer.json
         $composerJson = json_decode(file_get_contents($composerJsonFile), true);
         $repositories = $composerJson['repositories'] ?? [];
-        $require = $composerJson['require'] ?? [];
+        $require      = $composerJson['require'] ?? [];
 
-        $modulesConfig = (array)$this->config['modules'];
-        array_push($modulesConfig, $module);
-        $output->writeln("<info>Installing module: $module.</info>");
-
-        $modulePath = "./src/$module";
-        $moduleFullPath = APP_ROOT . "/$modulePath";
+        // 3. keep composer.json data
         $moduleJsonData = ComposerHelper::getComposerJsonData($moduleFullPath);
 
-        // Add to repositories
+        // 4. add repositories
         $repositories[] = [
-            'type' => 'path',
-            'url' => $modulePath,
+            'type'    => 'path',
+            'url'     => $modulePath,
             'options' => ['symlink' => true],
         ];
 
-        // Add to require
+        // 5. add require
         if ($moduleJsonData && ! empty($moduleJsonData['name'])) {
             $require[$moduleJsonData['name']] = empty($moduleJsonData['version']) ? '*' : $moduleJsonData['version'];
         }
 
-        // Add Tests/ folder to autoload-dev
-        if (!isset($composerJson['autoload-dev'])) {
-            $composerJson['autoload-dev'] = ['psr-4' => new \stdClass()];
-        } elseif (!isset($composerJson['autoload-dev']['psr-4']) || !is_array($composerJson['autoload-dev']['psr-4'])
-            || array_keys($composerJson['autoload-dev']['psr-4']) === range(0, count($composerJson['autoload-dev']['psr-4']) - 1)) {
-            $composerJson['autoload-dev']['psr-4'] = new \stdClass();
+        // 6. set autoload-dev
+        if (! isset($composerJson['autoload-dev'])) {
+            $composerJson['autoload-dev'] = ['psr-4' => new stdClass()];
+        } elseif (! isset($composerJson['autoload-dev']['psr-4']) || ! is_array($composerJson['autoload-dev']['psr-4'])) {
+            $composerJson['autoload-dev']['psr-4'] = new stdClass();
         }
 
-        $autoloadDevKey = $module . "\\Tests\\";
+        $autoloadDevKey  = $module . "\\Tests\\";
         $autoloadDevPath = "src/{$module}/Tests/";
-
-        if (!is_object($composerJson['autoload-dev']['psr-4']) && !array_key_exists($autoloadDevKey, $composerJson['autoload-dev']['psr-4'])) {
+        if (! is_object($composerJson['autoload-dev']['psr-4']) && ! array_key_exists($autoloadDevKey, $composerJson['autoload-dev']['psr-4'])) {
             $composerJson['autoload-dev']['psr-4'][$autoloadDevKey] = $autoloadDevPath;
             $output->writeln("<info>Added autoload-dev: \"$autoloadDevKey\" => \"$autoloadDevPath\".</info>");
         }
 
-        // Save updated composer.json
+        // 7. save composer.json
         $composerJson['repositories'] = $repositories;
-        $composerJson['require'] = $require;
-
-        // We need to make sure that the empty autoload "psr-4" content is an object.
+        $composerJson['require']      = $require;
         if (empty($composerJson['autoload-dev']['psr-4'])) {
-            $composerJson['autoload-dev']['psr-4'] = new \stdClass();
+            $composerJson['autoload-dev']['psr-4'] = new stdClass();
         }
         file_put_contents($composerJsonFile, json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        // Save updated module config
-        file_put_contents($modulesConfigFile, "<?php\n\nreturn [\n    " . implode(",\n    ", array_map(fn ($m) => "'$m'", $modulesConfig)) . "\n];\n");
+        // 8. update module.config.php
+        if (file_exists($modulesConfigFile)) {
+            $existingModules = include $modulesConfigFile;
+            if (! is_array($existingModules)) {
+                $existingModules = [];
+            }
+        } else {
+            $existingModules = [];
+        }
 
-        // echo "\033[34mRunning composer dump-autoload...\n\033[0m";
-        // passthru("composer dump-autoload");
+        $modulesConfig = array_values(array_unique(array_merge($existingModules, [$module])));
+        file_put_contents(
+            $modulesConfigFile,
+            "<?php\n\nreturn [\n    " . implode(",\n    ", array_map(fn($m) => "'$m'", $modulesConfig)) . "\n];\n"
+        );
 
+        // 9. delete composer.lock
         if (file_exists($composerLockFile)) {
             unlink($composerLockFile);
             $output->writeln("<info>File composer.lock removed successfully.</info>");
         }
 
-        $return = ComposerHelper::runComposerInstall($output);
-        if (false == $return) {
-            throw new RuntimeException(
-                'Aborting: Migration skipped due to composer install failure.'
-            );
+        // 10. composer install
+        if (! ComposerHelper::runComposerInstall($output)) {
+            throw new RuntimeException('Aborting: Migration skipped due to composer install failure.');
         }
 
-        $conn = DoctrineHelper::getConnection($this->config['db']);
+        // 11. run migrations
+        $conn      = DoctrineHelper::getConnection($this->config['db']);
         $migration = new ModuleMigrationRunner($output);
         $migration->command('install');
-        $return = $migration->run($module, $conn);
-
-        if ($return) { // run composer scripts for current module ..
-
-            $scripts = new ModuleComposerScriptRunner($output);
-            $scripts->command('install');
-            $scripts->run($moduleFullPath);
-            return;
-
-        } else {
-            throw new RuntimeException(
-                'Aborting: Migration failure.'
-            );
-            return;
+        if (! $migration->run($module, $conn)) {
+            throw new RuntimeException('Aborting: Migration failure.');
         }
-    }
 
+        // 12. run module composer script
+        $scripts = new ModuleComposerScriptRunner($output);
+        $scripts->command('install');
+        $scripts->run($moduleFullPath);
+    }
 }

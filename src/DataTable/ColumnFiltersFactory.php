@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Olobase\DataTable;
 
 use Laminas\Db\Adapter\AdapterInterface;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class ColumnFiltersFactory implements FactoryInterface
 {

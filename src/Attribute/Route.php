@@ -6,7 +6,7 @@ namespace Olobase\Attribute;
 
 use Attribute;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_CLASS)]
 class Route
 {
     public array $meta;

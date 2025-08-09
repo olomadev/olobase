@@ -6,6 +6,11 @@ namespace Olobase\ModuleManager;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function file_exists;
+use function file_get_contents;
+use function json_decode;
+use function passthru;
+
 /**
  * Runs the "olobase-post-install-cmd" and "remove" scripts defined in the composer.json module.
  *
@@ -43,23 +48,18 @@ class ModuleComposerScriptRunner
         $moduleComposer = json_decode(file_get_contents($moduleComposerPath), true);
 
         if ($this->command == "install" && ! empty($moduleComposer['extra']['olobase-post-install-cmd'])) {
-
             $postInstallCmds = $moduleComposer['extra']['olobase-post-install-cmd'] ?? [];
             foreach ($postInstallCmds as $cmd) {
                 $this->output->writeln("<info>Running module post-install-cmd: $cmd.</info>");
-                passthru($cmd." --ansi");
+                passthru($cmd . " --ansi");
             }
-
         }
         if ($this->command == "remove" && ! empty($moduleComposer['extra']['olobase-post-remove-cmd'])) {
-
             $postRemoveCmds = $moduleComposer['extra']['olobase-post-remove-cmd'] ?? [];
             foreach ($postRemoveCmds as $cmd) {
                 $this->output->writeln("<info>Running module post-remove-cmd: $cmd.</info>");
-                passthru($cmd." --ansi");
+                passthru($cmd . " --ansi");
             }
-
         }
     }
-
 }

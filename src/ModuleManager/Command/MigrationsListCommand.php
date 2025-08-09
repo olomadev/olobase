@@ -9,6 +9,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function passthru;
+use function putenv;
+use function trim;
+
 class MigrationsListCommand extends Command
 {
     protected static $defaultName = 'migrations:list';
@@ -26,11 +30,11 @@ class MigrationsListCommand extends Command
         $module = trim($input->getOption('module') ?? '');
         $env    = $input->getOption('env');
 
-        if (!$module || !$env) {
+        if (! $module || ! $env) {
             $output->writeln('<error>--module and --env options are required.</error>');
             return Command::FAILURE;
         }
-        putenv('APP_ENV='.trim($env));
+        putenv('APP_ENV=' . trim($env));
 
         passthru("php bin/migrations.php --module={$module} migrations:list --no-interaction --ansi");
     }

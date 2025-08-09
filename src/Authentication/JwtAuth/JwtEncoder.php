@@ -17,24 +17,21 @@ final class JwtEncoder implements JwtEncoderInterface
 
     public function __construct(array $config)
     {
-        $token = $config['token'] ?? [];
+        $token = $config['authentication']['token'] ?? [];
         if (empty($token['public_key']) || empty($token['private_key'])) {
             throw new JwtEncoderException("Public or private keys cannot be empty in your token configuration.");
         }
         if (empty($token['algorithm'])) {
             throw new JwtEncoderException("Token algorithm cannot be empty.");
         }
-        $this->publicKey = $token['public_key'];
+        $this->publicKey  = $token['public_key'];
         $this->privateKey = $token['private_key'];
-        $this->algorithm = $token['algorithm'];
-        $this->leeway = isset($token['leeway']) ? (int)$token['leeway'] : 60;
+        $this->algorithm  = $token['algorithm'];
+        $this->leeway     = isset($token['leeway']) ? (int) $token['leeway'] : 60;
     }
 
     /**
      * Encode array data to JWT token string
-     *
-     * @param array $payload
-     * @return string
      */
     public function encode(array $payload): string
     {
@@ -43,14 +40,11 @@ final class JwtEncoder implements JwtEncoderInterface
 
     /**
      * Decode token as array
-     *
-     * @param string $token
-     * @return array
      */
     public function decode(string $token): array
     {
         JWT::$leeway = $this->leeway;
-        $decoded = JWT::decode($token, new Key($this->publicKey, $this->algorithm));
+        $decoded     = JWT::decode($token, new Key($this->publicKey, $this->algorithm));
         return (array) $decoded;
     }
 }

@@ -5,54 +5,61 @@ declare(strict_types=1);
 namespace Olobase\Mapper;
 
 use Laminas\InputFilter\InputFilterInterface;
-use Olobase\Util\StringHelper;
-use OpenApi\Attributes\Property as OAProperty;
+use Olobase\Attribute\ObjectInput;
+use Olobase\Entity\AbstractEntity;
 use ReflectionClass;
+use RuntimeException;
 
 use function array_key_exists;
-use function explode;
+use function is_array;
+use function is_string;
+use function is_subclass_of;
 
 class InputSchemaMapper
 {
-    public function map(InputFilterInterface $inputFilter, object $dto, ?string $tablename = null): array
+    public function mapToEntity(InputFilterInterface $inputFilter, object|string $dtoOrEntity, ?string $entityClass = null): object
     {
-        $data       = $inputFilter->getData();
-        $reflection = new ReflectionClass($dto);
-        $properties = $reflection->getProperties();
+        if (is_string($dtoOrEntity)) {
+            $entityClass = $dtoOrEntity;
+            $dto         = null;
+        } else {
+            $dto = $dtoOrEntity;
+        }
 
-        $namespace    = $reflection->getNamespaceName();
-        $parts        = explode('\\', $namespace);
-        $firstSegment = $parts[0];
+        if (! $entityClass || ! is_subclass_of($entityClass, AbstractEntity::class)) {
+            throw new RuntimeException("Entity class {$entityClass} must extend AbstractEntity");
+        }
 
-        $table      = $tablename ?? StringHelper::toSnakeCase($firstSegment);
-        $schemaData = [];
+        $data = $inputFilter->getValues();
 
-        foreach ($properties as $prop) {
-            $propertyName = $prop->getName();
-
-            // OA\Property(property="is_active") → 'is_active'
-            $oaAttrs    = $prop->getAttributes(OAProperty::class);
-            $columnName = $propertyName;
-
-            if (! empty($oaAttrs)) {
-                $column = $oaAttrs[0]->newInstance();
-                if (! empty($column->property)) {
-                    $columnName = $column->property;
+        //  ObjectInput "id" support begin ...
+        if ($dto) {
+            $dtoReflection = new ReflectionClass($dto);
+            foreach ($dtoReflection->getProperties() as $prop) {
+                foreach ($prop->getAttributes(ObjectInput::class) as $attr) {
+                    $propName = $prop->getName();
+                    if (isset($data[$propName]) && is_array($data[$propName]) && array_key_exists('id', $data[$propName])) {
+                        $data[$propName] = $data[$propName]['id'];
+                    }
                 }
             }
+        }
+        //  ObjectInput "id" support end ...
+        $entityReflection = new ReflectionClass($entityClass);
+        $params           = [];
 
-            if (! array_key_exists($columnName, $data)) {
-                continue;
+        foreach ($entityReflection->getConstructor()->getParameters() as $param) {
+            $name = $param->getName();
+
+            if (array_key_exists($name, $data)) {
+                $params[] = $data[$name];
+            } elseif ($param->isDefaultValueAvailable()) {
+                $params[] = $param->getDefaultValue();
+            } else {
+                $params[] = null;
             }
-
-            $value                             = $inputFilter->getValue($columnName);
-            $schemaData[$table][$propertyName] = $value;
         }
 
-        if ($inputFilter->has('id')) {
-            $schemaData['id'] = $inputFilter->getValue('id');
-        }
-
-        return $schemaData;
+        return $entityReflection->newInstanceArgs($params);
     }
 }

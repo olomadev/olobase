@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authorization\Contract;
+namespace Olobase\Authorization;
 
 use Laminas\Paginator\Paginator;
 use Olobase\Repository\CrudRepositoryInterface;
@@ -15,7 +15,7 @@ interface RoleRepositoryInterface extends CrudRepositoryInterface
      * @param string $userId User ID
      * @return array List of role keys
      */
-    public function findRolesByUserId(string $userId): array;
+    public function findByUserId(string $userId): array;
 
     /**
      * Find all available roles for selection.

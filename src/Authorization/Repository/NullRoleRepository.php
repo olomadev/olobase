@@ -8,7 +8,7 @@ use Laminas\Paginator\Adapter\ArrayAdapter;
 use Laminas\Paginator\Paginator;
 use Olobase\Authorization\Contract\RoleRepositoryInterface;
 
-class NullRoleRepository extends CrudRepositoryInterface implements RoleRepositoryInterface
+class NullRoleRepository implements RoleRepositoryInterface
 {
     /**
      * Find roles assigned to a user by their userId.
@@ -39,7 +39,7 @@ class NullRoleRepository extends CrudRepositoryInterface implements RoleReposito
      * @param string $roleId Role ID
      * @return array Role details with permissions
      */
-    public function findOneById(string $roleId)
+    public function findById(string $roleId)
     {
         return false;
     }
@@ -54,5 +54,38 @@ class NullRoleRepository extends CrudRepositoryInterface implements RoleReposito
     {
         $paginatorAdapter = new ArrayAdapter([]);
         return new Paginator($paginatorAdapter);
+    }
+
+    /**
+     * Create entity
+     *
+     * @param  object $entity entity class
+     * @return mixed
+     */
+    public function createEntity(object $entity)
+    {
+        return null;
+    }
+
+    /**
+     * Update entity
+     *
+     * @param  object $entity entity class
+     * @return mixed
+     */
+    public function updateEntity(object $entity)
+    {
+        return null;
+    }
+
+    /**
+     * Delete entity
+     *
+     * @param  mixed $id id
+     * @return mixed
+     */
+    public function deleteEntity(int|string $id)
+    {
+        return null;
     }
 }

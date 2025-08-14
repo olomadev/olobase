@@ -6,9 +6,9 @@ namespace Olobase\Repository;
 
 interface CrudRepositoryInterface
 {
-    public function createEntity(object $entity): void;
+    public function createEntity(object $entity);
 
-    public function updateEntity(object $entity): void;
+    public function updateEntity(object $entity);
 
-    public function deleteEntity(string $id): void;
+    public function deleteEntity(int|string $id);
 }

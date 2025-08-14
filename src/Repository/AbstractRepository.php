@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Repository;
+namespace Olobase\Repository;
 
 use Laminas\Cache\Storage\StorageInterface;
 use Laminas\Db\TableGateway\TableGatewayInterface;
@@ -19,8 +19,8 @@ abstract class AbstractRepository implements EventManagerAwareInterface
     protected bool $eventsEnabled = false;
 
     public function __construct(
-        protected TableGatewayInterface $table,
-        protected StorageInterface $cache,
+        TableGatewayInterface $table,
+        StorageInterface $cache,
         ?EventManagerInterface $eventManager = null
     ) {
         $this->conn = $table->getAdapter()->getDriver()->getConnection();
@@ -31,51 +31,55 @@ abstract class AbstractRepository implements EventManagerAwareInterface
         }
     }
 
-    protected function transactional(callable $callback): void
+    protected function transactional(callable $callback): mixed
     {
         $this->conn->beginTransaction();
         try {
-            $callback();
+            $result = $callback();
             $this->deleteCache();
             $this->conn->commit();
+            return $result;
         } catch (Throwable $e) {
             $this->conn->rollback();
             throw $e;
         }
     }
 
-    public function createEntity(object $entity): void
+    public function createEntity(object $entity)
     {
-        $this->transactional(function () use ($entity) {
+        return $this->transactional(function () use ($entity) {
             $this->beforeCreate($entity);
-            $this->doCreate($entity);
+            $id = $this->doCreate($entity);
             $this->afterCreate($entity);
+            return $id;
         });
     }
 
-    public function updateEntity(object $entity): void
+    public function updateEntity(object $entity)
     {
-        $this->transactional(function () use ($entity) {
+        return $this->transactional(function () use ($entity) {
             $this->beforeUpdate($entity);
-            $this->doUpdate($entity);
+            $affectedRows = $this->doUpdate($entity);
             $this->afterUpdate($entity);
+            return $affectedRows;
         });
     }
 
-    public function deleteEntity(string $id): void
+    public function deleteEntity(string|int $id)
     {
-        $this->transactional(function () use ($id) {
+        return $this->transactional(function () use ($id) {
             $this->beforeDelete($id);
-            $this->doDelete($id);
+            $affectedRows = $this->doDelete($id);
             $this->afterDelete($id);
+            return $affectedRows;
         });
     }
 
-    abstract protected function doCreate(object $entity): void;
+    abstract protected function doCreate(object $entity);
 
-    abstract protected function doUpdate(object $entity): void;
+    abstract protected function doUpdate(object $entity);
 
-    abstract protected function doDelete(string $id): void;
+    abstract protected function doDelete(int|string $id);
 
     protected function beforeCreate(object $entity): void
     {

@@ -10,7 +10,7 @@ use Mezzio\Authentication\UserInterface;
 use Olobase\Authentication\JwtAuth\JwtAuthenticationInterface;
 use Olobase\Authentication\JwtAuth\JwtEncoderInterface;
 use Olobase\Authentication\JwtAuth\TokenInterface;
-use Olobase\Authorization\Contract\RoleModelInterface;
+use Olobase\Authorization\RoleRepositoryInterface;
 use Olobase\Util\StringHelper;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -60,7 +60,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
         private AdapterInterface $authAdapter,
         private JwtEncoderInterface $jwtEncoder,
         private TokenInterface $token,
-        private RoleModelInterface $roleModel,
+        private RoleRepositoryInterface $roleRepository,
         callable $userFactory
     ) {
         $this->userFactory    = $userFactory;
@@ -127,7 +127,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
 
     public function getError()
     {
-        return $this->setError;
+        return $this->error;
     }
 
     public function getCode()
@@ -174,7 +174,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
 
     protected function getUserRoles(): array|bool
     {
-        $roles = $this->roleModel->findRolesByUserId($this->rowObject->id);
+        $roles = $this->roleRepository->findByUserId($this->rowObject->id);
         if (empty($roles)) {
             $this->setError(self::NO_ROLE_DEFINED_ON_THE_ACCOUNT);
             return false;
@@ -203,7 +203,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
     protected function isTokenValid(): bool
     {
         $this->rawToken = $this->parseBearerToken(); // parse token from headers
-        if (! $this->token) {
+        if (! $this->rawToken) {
             $this->setError(self::AUTHENTICATION_REQUIRED);
             return false;
         }
@@ -281,7 +281,7 @@ class JwtAuthentication implements JwtAuthenticationInterface
 
     public function setError(string $errorKey)
     {
-        $this->setError = $errorKey;
+        $this->error = $errorKey;
     }
 
     public function setCode(string $code)

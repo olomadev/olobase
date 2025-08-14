@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Olobase\Authorization\Contract;
+namespace Olobase\Authorization;
 
 interface PermissionRepositoryInterface
 {

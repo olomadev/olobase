@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Olobase\Authorization;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use Olobase\Authorization\Contract\PermissionRepositoryInterface;
+use Olobase\Authorization\PermissionRepositoryInterface;
 use Psr\Container\ContainerInterface;
 
 class AuthorizationFactory implements FactoryInterface

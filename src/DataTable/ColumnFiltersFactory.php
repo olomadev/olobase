@@ -12,6 +12,6 @@ class ColumnFiltersFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
-        return new ColumnFilters($container->get(AdapterInterface::class));
+        return new ColumnFilters(adapter: $container->get(AdapterInterface::class));
     }
 }

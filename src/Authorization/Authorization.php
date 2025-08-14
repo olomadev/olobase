@@ -7,7 +7,7 @@ namespace Olobase\Authorization;
 use Mezzio\Authorization\AuthorizationInterface;
 use Mezzio\Authorization\Exception;
 use Mezzio\Router\RouteResult;
-use Olobase\Authorization\Contract\PermissionRepositoryInterface;
+use Olobase\Authorization\PermissionRepositoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use function in_array;

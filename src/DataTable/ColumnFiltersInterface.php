@@ -37,6 +37,11 @@ interface ColumnFiltersInterface
     public function setColumns(array $columns);
 
     /**
+     * Set search columns
+     */
+    public function setSearchColumns(array $columns);
+
+    /**
      * Set like columns
      */
     public function setLikeColumns(array $columns);

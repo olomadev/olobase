@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Olobase\Filter;
 
+use Laminas\InputFilter\CollectionInputFilter;
 use Laminas\InputFilter\InputFilter;
 use Laminas\InputFilter\InputFilterPluginManager;
-use Olobase\Attribute\CollectionInput;
-use Olobase\Attribute\CollectionInputFilter;
+use Olobase\Attribute\ArrayInput;
 use Olobase\Attribute\Input;
 use Olobase\Attribute\ObjectInput;
-use Olobase\Attribute\ObjectInputFilter;
+use Olobase\Filter\ObjectInputFilter;
 use ReflectionClass;
 
 use function file_exists;
@@ -108,7 +108,7 @@ class AttributeInputFilterCollector
                 continue;
             }
 
-            $collectionAttrs = $property->getAttributes(CollectionInput::class);
+            $collectionAttrs = $property->getAttributes(ArrayInput::class);
             if ($collectionAttrs) {
                 /** @var CollectionInput $collectionAttr */
                 $collectionAttr = $collectionAttrs[0]->newInstance();

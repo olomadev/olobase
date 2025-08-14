@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Olobase;
 
-use Authorization\Model\PermissionModel;
-use Authorization\Model\RoleModel;
+use Authorization\Repository\PermissionRepository;
+use Authorization\Repository\RoleRepository;
 use Mezzio\Application;
-use Olobase\Authorization\Contract\PermissionModelInterface;
-use Olobase\Authorization\Contract\RoleModelInterface;
-use Olobase\Authorization\Model\NullPermissionModel;
-use Olobase\Authorization\Model\NullRoleModel;
+use Olobase\Authorization\PermissionRepositoryInterface;
+use Olobase\Authorization\RoleRepositoryInterface;
+use Olobase\Authorization\Repository\NullPermissionRepository;
+use Olobase\Authorization\Repository\NullRoleRepository;
 use Olobase\Router\AttributeRouteCollector;
 use Olobase\Router\AttributeRouteProviderInterface;
 use Psr\Container\ContainerInterface;
@@ -52,17 +52,17 @@ class ConfigProvider
                         $container
                     );
                 },
-                PermissionModelInterface::class                     => function ($container) {
-                    if ($container->has(PermissionModel::class)) {
-                        return $container->has(PermissionModel::class);
+                PermissionRepositoryInterface::class                => function ($container) {
+                    if ($container->has(PermissionRepository::class)) {
+                        return $container->get(PermissionRepository::class);
                     }
-                    return new NullPermissionModel();
+                    return new NullPermissionRepository();
                 },
-                RoleModelInterface::class                           => function ($container) {
-                    if ($container->has(RoleModel::class)) {
-                        return $container->get(RoleModel::class);
+                RoleRepositoryInterface::class                      => function ($container) {
+                    if ($container->has(RoleRepository::class)) {
+                        return $container->get(RoleRepository::class);
                     }
-                    return new NullRoleModel();
+                    return new NullRoleRepository();
                 },
             ],
         ];
